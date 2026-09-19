@@ -85,14 +85,21 @@ function populateProfile(row) {
     shortBio: row?.short_bio,
     websiteUrl: row?.website_url,
     availability: row?.availability || 'Not specified',
-    visitType: (row?.visit_types || [])[0] || 'In-person & telehealth'
+    visitType: (row?.visit_types || [])[0] || 'In-person & telehealth',
+    providerGender: row?.provider_gender || ''
   });
   setChips('specialties', row?.specialties || []);
   setChips('approaches', row?.approaches || []);
+  setChips('populations', row?.populations || []);
+  setChips('insurance', row?.insurance || []);
   const builtInSpecialties = [...document.querySelectorAll('.profile-chips[data-field="specialties"] .filter-chip')].map(chip => chip.dataset.value);
   const builtInApproaches = [...document.querySelectorAll('.profile-chips[data-field="approaches"] .filter-chip')].map(chip => chip.dataset.value);
+  const builtInPopulations = [...document.querySelectorAll('.profile-chips[data-field="populations"] .filter-chip')].map(chip => chip.dataset.value);
+  const builtInInsurance = [...document.querySelectorAll('.profile-chips[data-field="insurance"] .filter-chip')].map(chip => chip.dataset.value);
   setCustomTags('customSpecialties', (row?.specialties || []).filter(value => !builtInSpecialties.includes(value)));
   setCustomTags('customApproaches', (row?.approaches || []).filter(value => !builtInApproaches.includes(value)));
+  setCustomTags('customPopulations', (row?.populations || []).filter(value => !builtInPopulations.includes(value)));
+  setCustomTags('customInsurance', (row?.insurance || []).filter(value => !builtInInsurance.includes(value)));
   setCustomTags('customServices', row?.services || []);
   const first = row?.first_name || '';
   const last = row?.last_name || '';
@@ -113,6 +120,9 @@ function formPayload() {
     website_url: normalizeWebsiteUrl(document.getElementById('websiteUrl').value),
     availability: document.getElementById('availability').value,
     visit_types: [document.getElementById('visitType').value],
+    provider_gender: document.getElementById('providerGender').value,
+    populations: [...getChips('populations'), ...getCustomTags('customPopulations')],
+    insurance: [...getChips('insurance'), ...getCustomTags('customInsurance')],
     specialties: [...getChips('specialties'), ...getCustomTags('customSpecialties')],
     approaches: [...getChips('approaches'), ...getCustomTags('customApproaches')],
     services: getCustomTags('customServices')
@@ -159,6 +169,10 @@ document.querySelectorAll('[data-jump]').forEach(b => b.addEventListener('click'
 document.querySelectorAll('.profile-chips .filter-chip').forEach(b => b.addEventListener('click', () => b.classList.toggle('active')));
 document.getElementById('addSpecialty')?.addEventListener('click', () => addCustomTag('customSpecialtyInput', 'customSpecialties'));
 document.getElementById('customSpecialtyInput')?.addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); addCustomTag('customSpecialtyInput', 'customSpecialties'); } });
+document.getElementById('addPopulation')?.addEventListener('click', () => addCustomTag('customPopulationInput', 'customPopulations'));
+document.getElementById('customPopulationInput')?.addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); addCustomTag('customPopulationInput', 'customPopulations'); } });
+document.getElementById('addInsurance')?.addEventListener('click', () => addCustomTag('customInsuranceInput', 'customInsurance'));
+document.getElementById('customInsuranceInput')?.addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); addCustomTag('customInsuranceInput', 'customInsurance'); } });
 document.getElementById('addService')?.addEventListener('click', () => addCustomTag('customServiceInput', 'customServices'));
 document.getElementById('customServiceInput')?.addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); addCustomTag('customServiceInput', 'customServices'); } });
 document.getElementById('addApproach')?.addEventListener('click', () => addCustomTag('customApproachInput', 'customApproaches'));
