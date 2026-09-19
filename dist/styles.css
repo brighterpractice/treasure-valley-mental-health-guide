@@ -564,3 +564,12 @@ body {
 /* Defensive header logo sizing for Advanced profile page */
 .advanced-profile-page .align-brand-mark{width:46px;height:46px;display:grid;place-items:center;flex:0 0 46px}
 .advanced-profile-page .align-brand-mark svg{width:29px;height:29px;display:block}
+
+/* Advanced profile footer cleanup */
+.advanced-profile-page .align-footer-grid > div:first-child strong,
+.advanced-profile-page .align-footer-grid > div:first-child small{
+  display:block;
+}
+.advanced-profile-page .align-footer-grid > div:first-child small{
+  margin-top:6px;
+}
