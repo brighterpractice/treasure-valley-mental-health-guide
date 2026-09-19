@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
+import QRCode from 'https://esm.sh/qrcode@1.5.4';
 
 const cfg = window.TV_GUIDE_SUPABASE;
 const supabase = cfg?.url && cfg?.publishableKey ? createClient(cfg.url, cfg.publishableKey) : null;
@@ -22,6 +23,8 @@ const demoAdvancedProfiles = {
     website_url: '',
     video_url: '',
     client_portal_url: '',
+    show_website_qr: false,
+    show_portal_qr: false,
     availability: 'Accepting new clients',
     visit_types: ['In-person', 'Telehealth'],
     populations: ['Adults'],
@@ -68,12 +71,35 @@ function youtubeEmbedUrl(value) {
   }
 }
 
+async function renderPublicQrs(p) {
+  const jobs = [];
+  if (p.show_website_qr && p.website_url) {
+    const canvas = document.getElementById('publicWebsiteQr');
+    if (canvas) jobs.push(QRCode.toCanvas(canvas, p.website_url, { width: 190, margin: 2, errorCorrectionLevel: 'M' }));
+  }
+  if (p.show_portal_qr && p.client_portal_url) {
+    const canvas = document.getElementById('publicPortalQr');
+    if (canvas) jobs.push(QRCode.toCanvas(canvas, p.client_portal_url, { width: 190, margin: 2, errorCorrectionLevel: 'M' }));
+  }
+  try { await Promise.all(jobs); } catch (error) { console.error('Unable to render public QR code', error); }
+}
+
 function renderProfile(p) {
   const fullName = `${p.first_name || ''} ${p.last_name || ''}`.trim();
   document.title = `${fullName || 'Provider'} | Treasure Valley Mental Health Guide`;
   const website = p.website_url ? `<a class="button primary" href="${esc(p.website_url)}" target="_blank" rel="noopener noreferrer">Visit provider website ↗</a>` : '';
   const clientPortal = p.client_portal_url ? `<a class="button secondary" href="${esc(p.client_portal_url)}" target="_blank" rel="noopener noreferrer">Client portal ↗</a>` : '';
   const videoEmbed = youtubeEmbedUrl(p.video_url);
+  const publicQrCard = (p.show_website_qr && p.website_url) || (p.show_portal_qr && p.client_portal_url)
+    ? `<article class="advanced-profile-card public-qr-card">
+        <p class="eyebrow">Quick access</p>
+        <h3>Scan to connect.</h3>
+        <div class="public-qr-grid">
+          ${p.show_website_qr && p.website_url ? `<a class="public-qr-item" href="${esc(p.website_url)}" target="_blank" rel="noopener noreferrer"><canvas id="publicWebsiteQr" width="190" height="190" aria-label="QR code for provider website"></canvas><strong>Practice website</strong><span>Scan or tap to visit</span></a>` : ''}
+          ${p.show_portal_qr && p.client_portal_url ? `<a class="public-qr-item" href="${esc(p.client_portal_url)}" target="_blank" rel="noopener noreferrer"><canvas id="publicPortalQr" width="190" height="190" aria-label="QR code for client or scheduling portal"></canvas><strong>Client / scheduling portal</strong><span>Scan or tap to open</span></a>` : ''}
+        </div>
+      </article>`
+    : '';
   const license = p.license_number
     ? `<div class="advanced-profile-detail"><span>State license</span><strong>${esc(p.license_state || 'State')} · ${esc(p.license_number)}</strong></div>`
     : '';
@@ -145,11 +171,11 @@ function renderProfile(p) {
           ${license}
           <div class="advanced-profile-detail"><span>Verification</span><strong>${esc(verified(p.last_verified_at,p.demo))}</strong></div>
         </article>
-
-
+        ${publicQrCard}
       </aside>
     </section>
   `;
+  renderPublicQrs(p);
 }
 
 function showUnavailable() {
