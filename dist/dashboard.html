@@ -75,18 +75,25 @@
     </section>
 
     <section class="portal-panel" id="panel-qr">
-      <div class="portal-card"><div class="card-heading"><div><span class="eyebrow">Advanced feature</span><h3>QR code generator</h3><p id="qrMessage" class="auth-message" role="status" aria-live="polite"></p></div><span class="badge">Advanced</span></div>
-        <p>Create a QR code for your public website or client portal. The QR is generated in your browser; the destination URL is not sent to a separate QR service.</p>
-        <div class="qr-builder">
-          <div class="qr-controls">
-            <label>Client portal URL<input id="clientPortalUrl" class="input" type="url" placeholder="https://portal.example.com"></label>
-            <label>QR destination<select id="qrTarget" class="input"><option value="website">Practice website</option><option value="portal">Client portal</option></select></label>
-            <div class="code-box" id="qrTargetValue">Choose a destination to preview its QR code.</div>
-            <div class="advanced-panel-actions"><button class="button secondary" type="button" id="saveQrLinks">Save client portal</button><button class="button primary" type="button" id="generateQr">Generate QR</button></div>
-            <div class="advanced-panel-actions"><button class="button secondary" type="button" id="copyQrLink">Copy destination</button><button class="button secondary" type="button" id="downloadQr">Download PNG</button></div>
-          </div>
-          <div class="qr-preview" aria-live="polite"><canvas id="qrCanvas" width="280" height="280" aria-label="Generated QR code"></canvas><small id="qrCaption">QR preview</small></div>
+      <div class="portal-card">
+        <div class="card-heading"><div><span class="eyebrow">Advanced feature</span><h3>QR code generator</h3><p id="qrMessage" class="auth-message" role="status" aria-live="polite"></p></div><span class="badge">Advanced</span></div>
+        <p>Create separate QR codes for your practice website and your client or scheduling portal. Download either one for printed materials, or choose to display it directly on your Advanced public profile.</p>
+        <label class="video-field">Client / scheduling portal URL<input id="clientPortalUrl" class="input" type="url" placeholder="https://portal.example.com"><small>This can be a client portal, online scheduling page, or another secure destination you want clients to reach.</small></label>
+        <div class="qr-option-grid">
+          <article class="qr-option-card">
+            <div><span class="eyebrow">Practice website</span><h4>Website QR</h4><p id="websiteQrUrl" class="qr-url">Add your practice website in My Profile.</p></div>
+            <div class="qr-preview compact"><canvas id="websiteQrCanvas" width="240" height="240" aria-label="Practice website QR code"></canvas></div>
+            <label class="qr-profile-toggle"><input id="showWebsiteQr" type="checkbox"> <span>Show this QR code on my public profile</span></label>
+            <div class="advanced-panel-actions"><button class="button secondary" type="button" id="copyWebsiteQr">Copy link</button><button class="button primary" type="button" id="downloadWebsiteQr">Download PNG</button></div>
+          </article>
+          <article class="qr-option-card">
+            <div><span class="eyebrow">Client / scheduling portal</span><h4>Portal QR</h4><p id="portalQrUrl" class="qr-url">Add a client or scheduling portal URL.</p></div>
+            <div class="qr-preview compact"><canvas id="portalQrCanvas" width="240" height="240" aria-label="Client or scheduling portal QR code"></canvas></div>
+            <label class="qr-profile-toggle"><input id="showPortalQr" type="checkbox"> <span>Show this QR code on my public profile</span></label>
+            <div class="advanced-panel-actions"><button class="button secondary" type="button" id="copyPortalQr">Copy link</button><button class="button primary" type="button" id="downloadPortalQr">Download PNG</button></div>
+          </article>
         </div>
+        <div class="advanced-panel-actions qr-save-row"><button class="button primary" type="button" id="saveQrSettings">Save QR settings</button></div>
       </div>
     </section>
 
