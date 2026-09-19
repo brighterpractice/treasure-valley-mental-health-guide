@@ -105,8 +105,16 @@ function getCustomTags(id) {
 }
 function addCustomTag(inputId, listId) {
   const input = document.getElementById(inputId);
+  const list = document.getElementById(listId);
+  if (!input || !list) {
+    console.error('Custom field target missing', { inputId, listId });
+    return;
+  }
   const value = input.value.trim();
-  if (!value) return;
+  if (!value) {
+    input.focus();
+    return;
+  }
   const existing = getCustomTags(listId);
   if (!existing.some(item => item.toLowerCase() === value.toLowerCase())) {
     setCustomTags(listId, [...existing, value]);
@@ -323,16 +331,20 @@ async function submitProfile() {
 buttons.forEach(b => b.addEventListener('click', () => showPanel(b.dataset.panel)));
 document.querySelectorAll('[data-jump]').forEach(b => b.addEventListener('click', () => showPanel(b.dataset.jump)));
 document.querySelectorAll('.profile-chips .filter-chip').forEach(b => b.addEventListener('click', () => b.classList.toggle('active')));
-document.getElementById('addSpecialty')?.addEventListener('click', () => addCustomTag('customSpecialtyInput', 'customSpecialties'));
-document.getElementById('customSpecialtyInput')?.addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); addCustomTag('customSpecialtyInput', 'customSpecialties'); } });
-document.getElementById('addPopulation')?.addEventListener('click', () => addCustomTag('customPopulationInput', 'customPopulations'));
-document.getElementById('customPopulationInput')?.addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); addCustomTag('customPopulationInput', 'customPopulations'); } });
-document.getElementById('addInsurance')?.addEventListener('click', () => addCustomTag('customInsuranceInput', 'customInsurance'));
-document.getElementById('customInsuranceInput')?.addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); addCustomTag('customInsuranceInput', 'customInsurance'); } });
-document.getElementById('addService')?.addEventListener('click', () => addCustomTag('customServiceInput', 'customServices'));
-document.getElementById('customServiceInput')?.addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); addCustomTag('customServiceInput', 'customServices'); } });
-document.getElementById('addApproach')?.addEventListener('click', () => addCustomTag('customApproachInput', 'customApproaches'));
-document.getElementById('customApproachInput')?.addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); addCustomTag('customApproachInput', 'customApproaches'); } });
+document.addEventListener('click', event => {
+  const button = event.target.closest('[data-custom-input][data-custom-list]');
+  if (!button) return;
+  event.preventDefault();
+  addCustomTag(button.dataset.customInput, button.dataset.customList);
+});
+document.addEventListener('keydown', event => {
+  if (event.key !== 'Enter') return;
+  const input = event.target.closest('#customSpecialtyInput, #customPopulationInput, #customInsuranceInput, #customServiceInput, #customApproachInput');
+  if (!input) return;
+  event.preventDefault();
+  const button = document.querySelector(`[data-custom-input="${input.id}"]`);
+  if (button) addCustomTag(button.dataset.customInput, button.dataset.customList);
+});
 document.getElementById('saveProfile')?.addEventListener('click', saveProfile);
 document.getElementById('saveMedia')?.addEventListener('click', () => saveAdvanced('mediaMessage', 'Video saved.'));
 document.getElementById('saveQrSettings')?.addEventListener('click', async () => {
