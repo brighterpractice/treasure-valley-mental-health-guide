@@ -597,3 +597,19 @@ body {
 .qr-destination-assigner{display:grid;gap:12px;margin:18px 0 8px;padding:18px;border:1px solid var(--line);border-radius:18px;background:#f8faf7}
 .qr-assign-actions{display:flex;gap:10px;flex-wrap:wrap}
 .qr-assign-actions .button{min-height:44px}
+
+
+/* Provider portal: blue Advanced insight + analytics date range */
+.portal-body .advanced-teaser{
+  background:linear-gradient(135deg,#173b63,#0d2946)!important;
+}
+.portal-body .advanced-teaser .eyebrow{color:#b9cce0!important}
+.portal-body .advanced-teaser p{color:#d8e4ef!important}
+.portal-body .advanced-teaser .teaser-stats span{background:rgba(255,255,255,.10)}
+.portal-body .advanced-teaser[hidden]{display:none!important}
+.analytics-range{display:flex;gap:10px;align-items:end;flex-wrap:wrap}
+.analytics-range label{display:grid;gap:5px;color:var(--muted);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.analytics-range .input{min-width:155px}
+.analytics-empty{color:var(--muted);font-size:13px;padding:10px 0}
+.field-help{display:block;color:var(--muted);font-weight:400;margin-top:6px;line-height:1.45}
+@media(max-width:760px){.analytics-header{align-items:flex-start;flex-direction:column;gap:14px}.analytics-range{width:100%}.analytics-range label{flex:1}.analytics-range .input{min-width:0}}
