@@ -27,11 +27,11 @@
 
       <button class="menu-button align-menu-button" id="menuButton" aria-expanded="false" aria-controls="primaryNav">Menu</button>
       <nav class="align-primary-nav" id="primaryNav" aria-label="Primary navigation">
-        <a href="#resources">Resources</a>
-        <a href="#find">Find a counselor</a>
+        <a href="resources.html">Resources</a>
+        <a href="find-counselor.html">Find a counselor</a>
         <a href="#about">About the guide</a>
         <a href="providers.html">For providers</a>
-        <a class="align-nav-cta" href="#find">Find your support</a>
+        <a class="align-nav-cta" href="find-counselor.html">Find your support</a>
       </nav>
     </div>
   </header>
@@ -43,7 +43,7 @@
           <h1>A little support.<br>A new <em>beginning.</em></h1>
           <p class="warm-lead">Finding someone to talk to should feel a little easier. Explore local counselors and find support that feels right for you.</p>
           <form id="heroSearch" class="hero-search"><label for="heroConcern">What would you like support with?</label><div><input id="heroConcern" placeholder="Anxiety, relationships, life changes…" type="search"><button class="button primary" type="submit">Find a counselor <span aria-hidden="true">↗</span></button></div></form>
-          <a class="gentle-link" href="#resources">Not sure where to start? Explore resources →</a>
+          <a class="gentle-link" href="resources.html">Not sure where to start? Explore resources →</a>
         </div>
         <figure class="warm-photo"><img src="assets/river-path.webp" alt="A sunlit path alongside a quiet river, surrounded by trees" width="1200" height="1000"><figcaption>Support close to home.</figcaption></figure>
       </div>
@@ -59,81 +59,19 @@
         </div>
 
         <div class="align-signal-list">
-          <a href="#find"><span>01</span><div><h3>Find a counselor</h3><p>Search by specialty, location, insurance, treatment approach, availability, and more.</p></div><b aria-hidden="true">↗</b></a>
-          <a href="#trauma"><span>02</span><div><h3>Trauma & EMDR</h3><p>Understand trauma-informed care, EMDR, and useful questions to ask a potential counselor.</p></div><b aria-hidden="true">↗</b></a>
-          <a href="#crisis"><span>03</span><div><h3>Crisis & immediate help</h3><p>Find urgent and emergency resources when someone needs help right away.</p></div><b aria-hidden="true">↗</b></a>
-          <a href="#psychiatry"><span>04</span><div><h3>Psychiatry & medication</h3><p>Learn about medication management and how psychiatric care can work alongside counseling.</p></div><b aria-hidden="true">↗</b></a>
-          <a href="#community"><span>05</span><div><h3>Community support</h3><p>Explore support groups, nonprofits, family resources, and community-based services.</p></div><b aria-hidden="true">↗</b></a>
-          <a href="#low-cost"><span>06</span><div><h3>Lower-cost options</h3><p>Explore sliding-scale care, community clinics, and other ways to make support more affordable.</p></div><b aria-hidden="true">↗</b></a>
-        </div>
+          <a href="find-counselor.html"><span>01</span><div><h3>Find a counselor</h3><p>Search by specialty, location, insurance, treatment approach, availability, and more.</p></div><b aria-hidden="true">↗</b></a>
+          <a href="trauma.html"><span>02</span><div><h3>Trauma & EMDR</h3><p>Understand trauma-informed care, EMDR, and useful questions to ask a potential counselor.</p></div><b aria-hidden="true">↗</b></a>
+          <a href="crisis-help.html"><span>03</span><div><h3>Crisis & immediate help</h3><p>Find urgent and emergency resources when someone needs help right away.</p></div><b aria-hidden="true">↗</b></a>
+          <a href="psychiatry-medication.html"><span>04</span><div><h3>Psychiatry & medication</h3><p>Learn about medication management and how psychiatric care can work alongside counseling.</p></div><b aria-hidden="true">↗</b></a>
+          <a href="community-assistance.html"><span>05</span><div><h3>Community support</h3><p>Explore support groups, nonprofits, family resources, and community-based services.</p></div><b aria-hidden="true">↗</b></a>
+          <a href="lower-cost-care.html"><span>06</span><div><h3>Lower-cost options</h3><p>Explore sliding-scale care, community clinics, and other ways to make suppor    <section class="home-directory-teaser">
+      <div class="shell home-directory-teaser-grid">
+        <div><p class="eyebrow">Find your counselor</p><h2>Search with the details that matter to you.</h2><p>Use location and distance, specialties, insurance, approaches, telehealth, availability, and other practical preferences to narrow the directory.</p></div>
+        <div class="home-directory-actions"><a class="button primary" href="find-counselor.html">Search counselors</a><a class="gentle-link" href="resources.html">Explore mental health resources →</a></div>
       </div>
     </section>
 
-    <section class="align-directory-section" id="find">
-      <div class="shell">
-        <div class="align-directory-heading">
-          <div><p class="eyebrow">Counselor directory</p><h2>Find someone you can connect with.</h2></div>
-          <p>Start with what matters to you. Narrow your options by location, insurance, approach, and availability.</p>
-        </div>
-
-        <div class="directory-layout align-directory-layout">
-          <aside class="filters-card align-filters-card">
-            <div class="filter-topline">
-              <div><span class="filter-kicker">Refine your search</span><h3>What matters most?</h3></div>
-              <button class="text-button" id="clearFilters">Clear</button>
-            </div>
-
-            <label class="field-label" for="searchText">What would you like support with?</label>
-            <div class="search-input-wrap"><span>⌕</span><input id="searchText" class="input" type="search" placeholder="Trauma, anxiety, EMDR…" /></div>
-
-            <div class="filter-group distance-search">
-              <span class="field-label">Starting address <small>home, work, or another place</small></span>
-              <div class="distance-address-row"><input id="addressFilter" class="input" type="search" autocomplete="street-address" placeholder="Enter an address"><button id="applyAddressFilter" class="button secondary small-btn" type="button">Use address</button></div>
-              <div class="distance-radius-row"><label><span class="field-label">Within</span><select id="radiusFilter" class="input"><option value="1">1 mile</option><option value="2">2 miles</option><option value="5" selected>5 miles</option><option value="10">10 miles</option><option value="25">25 miles</option><option value="50">50 miles</option></select></label><p id="addressStatus" class="distance-status" role="status" aria-live="polite">Your exact address stays in this browser and is not shown to providers.</p></div>
-            </div>
-            <div class="filter-group">
-              <label><span class="field-label">Counselor location</span>
-                <select id="cityFilter" class="input"><option value="">Anywhere in the Treasure Valley</option><option>Meridian</option><option>Boise</option><option>Eagle</option><option>Nampa</option><option>Kuna</option><option>Star</option><option>Caldwell</option></select>
-              </label>
-            </div>
-
-            <div class="filter-group">
-              <span class="field-label">Areas of support</span>
-              <div class="chip-options" id="specialtyFilters">
-                <button type="button" class="filter-chip" data-value="Anxiety">Anxiety</button>
-                <button type="button" class="filter-chip" data-value="Trauma">Trauma</button>
-                <button type="button" class="filter-chip" data-value="Grief">Grief</button>
-                <button type="button" class="filter-chip" data-value="Life Transitions">Life transitions</button>
-                <button type="button" class="filter-chip" data-value="Relationships">Relationships</button>
-                <button type="button" class="filter-chip" data-value="OCD">OCD</button>
-              </div>
-            </div>
-
-            <details class="more-filters">
-              <summary>More preferences</summary>
-              <div class="filter-group two-col">
-                <label><span class="field-label">Works with</span><select id="populationFilter" class="input"><option value="">Any</option><option>Adults</option><option>Teens</option><option>Children</option><option>Couples</option><option>Families</option></select></label>
-                <label><span class="field-label">Provider gender</span><select id="genderFilter" class="input"><option value="">No preference</option><option>Female</option><option>Male</option><option>Nonbinary</option></select></label>
-              </div>
-              <div class="filter-group two-col">
-                <label><span class="field-label">Visit type</span><select id="visitFilter" class="input"><option value="">Any</option><option>In-person</option><option>Telehealth</option></select></label>
-                <label><span class="field-label">Availability</span><select id="availabilityFilter" class="input"><option value="">Any</option><option>Accepting new clients</option><option>Waitlist</option></select></label>
-              </div>
-              <div class="filter-group two-col">
-                <label><span class="field-label">Insurance / payment</span><select id="insuranceFilter" class="input"><option value="">Any</option><option>Blue Cross of Idaho</option><option>Regence</option><option>PacificSource</option><option>Aetna</option><option>Self-pay</option></select></label>
-                <label><span class="field-label">Therapy approach</span><select id="approachFilter" class="input"><option value="">Any</option><option>EMDR</option><option>CBT</option><option>ACT</option><option>DBT-informed</option><option>Person-centered</option></select></label>
-              </div>
-            </details>
-
-            <div class="privacy-note"><b>Privacy-minded search.</b> Address-based distance is calculated for this search only. Your exact address and individual sensitive searches are not exposed to providers.</div>
-          </aside>
-
-          <div class="results-area">
-            <p class="preview-note">Loading published provider profiles…</p><div class="results-toolbar align-results-toolbar">
-              <div><strong id="resultsCount">0 providers</strong><span id="matchSummary"> in this guide</span></div>
-              <label class="sort-label"><span>Sort by</span><select id="sortSelect" class="compact-select"><option value="az">Last name A–Z</option><option value="distance">Distance — nearest first</option><option value="relevance">Best match to filters</option><option value="availability">Accepting new clients first</option><option value="experience">Years in practice</option></select></label>
-            </div>
-            <div id="results" class="results-list" aria-live="polite"></div>
+s="results-list" aria-live="polite"></div>
           </div>
         </div>
       </div>
@@ -145,7 +83,7 @@
           <p class="eyebrow">A guide, not a ranking</p>
           <h2>Your needs lead the way.</h2>
           <p>Search results are shaped by your filters and the sort option you choose—not by paid placement.</p>
-          <a class="align-light-link" href="#find">Try the directory →</a>
+          <a class="align-light-link" href="find-counselor.html">Try the directory →</a>
         </div>
         <ol class="align-process-list">
           <li><span>01</span><div><h3>Filter</h3><p>Choose practical criteria such as concern, insurance, location, modality, or availability.</p></div></li>
@@ -182,7 +120,7 @@
     <section class="align-cta">
       <div class="shell align-cta-grid">
         <div><p class="eyebrow">Built for the Treasure Valley</p><h2>Start with a question, a concern, or a practical need.</h2></div>
-        <div><p>The guide is being built to make local mental health resources easier to understand and easier to compare.</p><a class="button light-button" href="#find">Search counselors</a></div>
+        <div><p>The guide is being built to make local mental health resources easier to understand and easier to compare.</p><a class="button light-button" href="find-counselor.html">Search counselors</a></div>
       </div>
     </section>
   </main>
@@ -190,22 +128,12 @@
   <footer class="align-footer">
     <div class="shell align-footer-grid">
       <div><a class="align-brand footer-brand" href="#home"><span class="align-brand-mark"><svg viewBox="0 0 48 48"><path d="M8 35 20 15l8 12 5-8 7 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 38h30" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></span><span class="align-brand-copy"><strong>Treasure Valley</strong><small>Mental Health Guide</small></span></a></div>
-      <div><span class="footer-label">Guide</span><a href="#resources">Resources</a><a href="#find">Find a counselor</a><a href="#about">About</a></div>
+      <div><span class="footer-label">Guide</span><a href="resources.html">Resources</a><a href="find-counselor.html">Find a counselor</a><a href="#about">About</a></div>
       <div><span class="footer-label">Providers</span><a href="providers.html">Provider plans</a><a href="provider-login.html">Provider portal</a><small>Technical support by Brighter Sites</small></div>
       <div><span class="footer-label">Planned domain</span><strong>TVMentalHealthGuide.org</strong><small>Prototype content includes fictional provider information for design testing.</small></div>
     </div>
   </footer>
 
-  <dialog id="resourceDialog" class="profile-dialog"><button class="dialog-close" onclick="this.closest('dialog').close()" aria-label="Close resource">×</button><p class="eyebrow">LOCAL RESOURCE GUIDE</p><h2 id="resourceTitle"></h2><p>This section is being prepared. Local resources and contact details will be added before the guide launches.</p><a class="button primary" href="#find" onclick="this.closest('dialog').close()">Explore sample counselors</a></dialog><dialog id="profileDialog" class="profile-dialog">
-    <button class="dialog-close" id="closeDialog" aria-label="Close profile">×</button>
-    <div id="profileDialogContent"></div>
-  </dialog>
-
-  <dialog id="providerDialog" class="profile-dialog provider-dialog">
-    <button class="dialog-close" id="closeProviderDialog" aria-label="Close signup preview">×</button>
-    <div><div class="eyebrow">Provider listing preview</div><h2>What we would collect</h2><div class="signup-grid"><div><span>Professional</span><strong>Name, credentials, license type, years in practice</strong></div><div><span>Practice</span><strong>Practice name, website, locations, service area</strong></div><div><span>Clinical fit</span><strong>Specialties, populations, modalities, approaches</strong></div><div><span>Access</span><strong>Insurance, self-pay, telehealth, accepting clients</strong></div><div><span>Profile</span><strong>Short bio, optional photo/logo, contact link</strong></div><div><span>Verification</span><strong>Annual renewal + periodic accuracy confirmation</strong></div></div><p class="dialog-note">The real provider flow will include credential attestation, terms, directory policies, billing, and an edit/update portal.</p></div>
-  </dialog>
-
-  <script src="supabase-config.js"></script><script type="module" src="app.js"></script><script src="warm.js"></script>
+  <script src="warm.js"></script>
 </body>
 </html>
