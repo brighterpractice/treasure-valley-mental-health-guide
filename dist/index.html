@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Treasure Valley Mental Health Guide</title>
+  <meta name="description" content="A local guide to counselors, therapy, psychiatry, crisis support, and mental health resources across Idaho's Treasure Valley." />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="warm-theme.css" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 40 40%27%3E%3Crect width=%2740%27 height=%2740%27 rx=%2712%27 fill=%27%23435543%27/%3E%3Ctext x=%2720%27 y=%2727%27 text-anchor=%27middle%27 font-size=%2724%27 fill=%27%23fff9ed%27%3ET%3C/text%3E%3C/svg%3E"></head>
+<body class="warm-site">
+  <header class="align-header">
+    <div class="shell align-nav-shell">
+      <a class="align-brand" href="#home" aria-label="Treasure Valley Mental Health Guide home">
+        <span class="align-brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 48 48" role="img">
+            <path d="M8 35 20 15l8 12 5-8 7 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M9 38h30" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span class="align-brand-copy">
+          <strong>Treasure Valley</strong>
+          <small>Mental Health Guide</small>
+        </span>
+      </a>
+
+      <button class="menu-button align-menu-button" id="menuButton" aria-expanded="false" aria-controls="primaryNav">Menu</button>
+      <nav class="align-primary-nav" id="primaryNav" aria-label="Primary navigation">
+        <a href="#resources">Resources</a>
+        <a href="#find">Find a counselor</a>
+        <a href="#about">About the guide</a>
+        <a href="providers.html">For providers</a>
+        <a class="align-nav-cta" href="#find">Find your support</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="home">
+    <section class="warm-hero">
+      <div class="shell warm-hero-grid">
+        <div class="warm-intro"><p class="eyebrow">HERE IN THE TREASURE VALLEY</p>
+          <h1>A little support.<br>A new <em>beginning.</em></h1>
+          <p class="warm-lead">Finding someone to talk to should feel a little easier. Explore local counselors and find support that feels right for you.</p>
+          <form id="heroSearch" class="hero-search"><label for="heroConcern">What would you like support with?</label><div><input id="heroConcern" placeholder="Anxiety, relationships, life changes…" type="search"><button class="button primary" type="submit">Find a counselor <span aria-hidden="true">↗</span></button></div></form>
+          <a class="gentle-link" href="#resources">Not sure where to start? Explore resources →</a>
+        </div>
+        <figure class="warm-photo"><img src="assets/river-path.webp" alt="A sunlit path alongside a quiet river, surrounded by trees" width="1200" height="1000"><figcaption>Support close to home.</figcaption></figure>
+      </div>
+      <div class="shell region-strip"><span>LOCAL CONNECTIONS. ROOM TO GROW.</span><p>Boise · Meridian · Eagle · Nampa · Kuna · Star · Caldwell</p></div>
+    </section>
+
+    <section class="align-signal-section" id="resources">
+      <div class="shell align-signal-layout">
+        <div class="align-signal-intro">
+          <p class="eyebrow">Start with what you need</p>
+          <h2>A place to start,<br>wherever you are.</h2>
+          <p>You don’t have to have it all figured out. Explore a few paths toward the support you need.</p>
+        </div>
+
+        <div class="align-signal-list">
+          <a href="#find"><span>01</span><div><h3>Find a counselor</h3><p>Search by specialty, location, insurance, treatment approach, availability, and more.</p></div><b aria-hidden="true">↗</b></a>
+          <a href="#trauma"><span>02</span><div><h3>Trauma & EMDR</h3><p>Understand trauma-informed care, EMDR, and useful questions to ask a potential counselor.</p></div><b aria-hidden="true">↗</b></a>
+          <a href="#crisis"><span>03</span><div><h3>Crisis & immediate help</h3><p>Find urgent and emergency resources when someone needs help right away.</p></div><b aria-hidden="true">↗</b></a>
+          <a href="#psychiatry"><span>04</span><div><h3>Psychiatry & medication</h3><p>Learn about medication management and how psychiatric care can work alongside counseling.</p></div><b aria-hidden="true">↗</b></a>
+          <a href="#community"><span>05</span><div><h3>Community support</h3><p>Explore support groups, nonprofits, family resources, and community-based services.</p></div><b aria-hidden="true">↗</b></a>
+          <a href="#low-cost"><span>06</span><div><h3>Lower-cost options</h3><p>Explore sliding-scale care, community clinics, and other ways to make support more affordable.</p></div><b aria-hidden="true">↗</b></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="align-directory-section" id="find">
+      <div class="shell">
+        <div class="align-directory-heading">
+          <div><p class="eyebrow">Counselor directory</p><h2>Find someone you can connect with.</h2></div>
+          <p>Start with what matters to you. Narrow your options by location, insurance, approach, and availability.</p>
+        </div>
+
+        <div class="directory-layout align-directory-layout">
+          <aside class="filters-card align-filters-card">
+            <div class="filter-topline">
+              <div><span class="filter-kicker">Refine your search</span><h3>What matters most?</h3></div>
+              <button class="text-button" id="clearFilters">Clear</button>
+            </div>
+
+            <label class="field-label" for="searchText">What would you like support with?</label>
+            <div class="search-input-wrap"><span>⌕</span><input id="searchText" class="input" type="search" placeholder="Trauma, anxiety, EMDR…" /></div>
+
+            <div class="filter-group location-tools">
+              <label><span class="field-label">Your area <small>for distance sorting</small></span>
+                <select id="originFilter" class="input"><option value="">Not specified</option><option>Meridian</option><option>Boise</option><option>Eagle</option><option>Nampa</option><option>Kuna</option><option>Star</option><option>Caldwell</option></select>
+              </label>
+              <label><span class="field-label">Counselor location</span>
+                <select id="cityFilter" class="input"><option value="">Anywhere in the Treasure Valley</option><option>Meridian</option><option>Boise</option><option>Eagle</option><option>Nampa</option><option>Kuna</option><option>Star</option><option>Caldwell</option></select>
+              </label>
+            </div>
+
+            <div class="filter-group">
+              <span class="field-label">Areas of support</span>
+              <div class="chip-options" id="specialtyFilters">
+                <button type="button" class="filter-chip" data-value="Anxiety">Anxiety</button>
+                <button type="button" class="filter-chip" data-value="Trauma">Trauma</button>
+                <button type="button" class="filter-chip" data-value="Grief">Grief</button>
+                <button type="button" class="filter-chip" data-value="Life Transitions">Life transitions</button>
+                <button type="button" class="filter-chip" data-value="Relationships">Relationships</button>
+                <button type="button" class="filter-chip" data-value="OCD">OCD</button>
+              </div>
+            </div>
+
+            <details class="more-filters">
+              <summary>More preferences</summary>
+              <div class="filter-group two-col">
+                <label><span class="field-label">Works with</span><select id="populationFilter" class="input"><option value="">Any</option><option>Adults</option><option>Teens</option><option>Children</option><option>Couples</option><option>Families</option></select></label>
+                <label><span class="field-label">Provider gender</span><select id="genderFilter" class="input"><option value="">No preference</option><option>Female</option><option>Male</option><option>Nonbinary</option></select></label>
+              </div>
+              <div class="filter-group two-col">
+                <label><span class="field-label">Visit type</span><select id="visitFilter" class="input"><option value="">Any</option><option>In-person</option><option>Telehealth</option></select></label>
+                <label><span class="field-label">Availability</span><select id="availabilityFilter" class="input"><option value="">Any</option><option>Accepting new clients</option><option>Waitlist</option></select></label>
+              </div>
+              <div class="filter-group two-col">
+                <label><span class="field-label">Insurance / payment</span><select id="insuranceFilter" class="input"><option value="">Any</option><option>Blue Cross of Idaho</option><option>Regence</option><option>PacificSource</option><option>Aetna</option><option>Self-pay</option></select></label>
+                <label><span class="field-label">Therapy approach</span><select id="approachFilter" class="input"><option value="">Any</option><option>EMDR</option><option>CBT</option><option>ACT</option><option>DBT-informed</option><option>Person-centered</option></select></label>
+              </div>
+            </details>
+
+            <div class="privacy-note"><b>Privacy-minded search.</b> Distance can later use ZIP code rather than a street address, and individual sensitive searches will not be exposed to providers.</div>
+          </aside>
+
+          <div class="results-area">
+            <p class="preview-note">Design preview · Listings are sample data, not verified availability.</p><div class="results-toolbar align-results-toolbar">
+              <div><strong id="resultsCount">0 providers</strong><span id="matchSummary"> in this guide</span></div>
+              <label class="sort-label"><span>Sort by</span><select id="sortSelect" class="compact-select"><option value="az">Last name A–Z</option><option value="distance">Distance — nearest first</option><option value="relevance">Best match to filters</option><option value="availability">Accepting new clients first</option><option value="experience">Years in practice</option></select></label>
+            </div>
+            <div id="results" class="results-list" aria-live="polite"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="align-process" id="how-it-works">
+      <div class="shell align-process-grid">
+        <div class="align-process-copy">
+          <p class="eyebrow">A guide, not a ranking</p>
+          <h2>Your needs lead the way.</h2>
+          <p>The directory does not sell better organic placement. A paid plan changes what a provider can include in a profile—not where that provider appears by default.</p>
+          <a class="align-light-link" href="#find">Try the directory →</a>
+        </div>
+        <ol class="align-process-list">
+          <li><span>01</span><div><h3>Filter</h3><p>Choose practical criteria such as concern, insurance, location, modality, or availability.</p></div></li>
+          <li><span>02</span><div><h3>Sort</h3><p>Keep alphabetical order or switch to distance, relevance, availability, or experience.</p></div></li>
+          <li><span>03</span><div><h3>Review</h3><p>Open profiles to compare specialties, approaches, access information, and verification dates.</p></div></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="align-provider-section" id="providers">
+      <div class="shell align-provider-grid">
+        <div class="provider-message"><p class="eyebrow">A LOCAL GUIDE. A SHARED PURPOSE.</p><blockquote>Good connections<br>can change<br><em>everything.</em></blockquote><p>Make it easier for people nearby to discover your practice.</p></div>
+        <div class="align-provider-copy">
+          <p class="eyebrow">For counselors & practices</p>
+          <h2>Help your community find you.</h2>
+          <p>Providers create their own account, maintain their public information, and periodically confirm that their profile is still accurate.</p>
+          <dl class="align-plan-snapshot">
+            <div><dt>Basic</dt><dd><strong>$12/year</strong><span>Core searchable profile + headshot</span></dd></div>
+            <div><dt>Advanced</dt><dd><strong>$49/year</strong><span>Media, QR tools, scheduling links + privacy-conscious analytics</span></dd></div>
+          </dl>
+          <div class="align-hero-actions"><a class="button primary" href="providers.html">Compare provider plans</a><a class="align-text-link" href="provider-login.html">Preview provider portal →</a></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="align-facts" id="about">
+      <div class="shell">
+        <p class="eyebrow">Guide principles</p>
+        <dl>
+          <div><dt>Scope</dt><dd>Treasure Valley mental health resources</dd></div>
+          <div><dt>Directory default</dt><dd>Last name A–Z</dd></div>
+          <div><dt>Paid ranking boost</dt><dd>None</dd></div>
+          <div><dt>Provider information</dt><dd>Self-managed + periodically verified</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="align-cta">
+      <div class="shell align-cta-grid">
+        <div><p class="eyebrow">Built for the Treasure Valley</p><h2>Start with a question, a concern, or a practical need.</h2></div>
+        <div><p>The guide is being built to make local mental health resources easier to understand and easier to compare.</p><a class="button light-button" href="#find">Search counselors</a></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="align-footer">
+    <div class="shell align-footer-grid">
+      <div><a class="align-brand footer-brand" href="#home"><span class="align-brand-mark"><svg viewBox="0 0 48 48"><path d="M8 35 20 15l8 12 5-8 7 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 38h30" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></span><span class="align-brand-copy"><strong>Treasure Valley</strong><small>Mental Health Guide</small></span></a></div>
+      <div><span class="footer-label">Guide</span><a href="#resources">Resources</a><a href="#find">Find a counselor</a><a href="#about">About</a></div>
+      <div><span class="footer-label">Providers</span><a href="providers.html">Provider plans</a><a href="provider-login.html">Provider portal</a><small>Technical support by Brighter Sites</small></div>
+      <div><span class="footer-label">Planned domain</span><strong>TVMentalHealthGuide.org</strong><small>Prototype content includes fictional provider information for design testing.</small></div>
+    </div>
+  </footer>
+
+  <dialog id="resourceDialog" class="profile-dialog"><button class="dialog-close" onclick="this.closest('dialog').close()" aria-label="Close resource">×</button><p class="eyebrow">LOCAL RESOURCE GUIDE</p><h2 id="resourceTitle"></h2><p>This section is being prepared. Local resources and contact details will be added before the guide launches.</p><a class="button primary" href="#find" onclick="this.closest('dialog').close()">Explore sample counselors</a></dialog><dialog id="profileDialog" class="profile-dialog">
+    <button class="dialog-close" id="closeDialog" aria-label="Close profile">×</button>
+    <div id="profileDialogContent"></div>
+  </dialog>
+
+  <dialog id="providerDialog" class="profile-dialog provider-dialog">
+    <button class="dialog-close" id="closeProviderDialog" aria-label="Close signup preview">×</button>
+    <div><div class="eyebrow">Provider listing preview</div><h2>What we would collect</h2><div class="signup-grid"><div><span>Professional</span><strong>Name, credentials, license type, years in practice</strong></div><div><span>Practice</span><strong>Practice name, website, locations, service area</strong></div><div><span>Clinical fit</span><strong>Specialties, populations, modalities, approaches</strong></div><div><span>Access</span><strong>Insurance, self-pay, telehealth, accepting clients</strong></div><div><span>Profile</span><strong>Short bio, optional photo/logo, contact link</strong></div><div><span>Verification</span><strong>Annual renewal + periodic accuracy confirmation</strong></div></div><p class="dialog-note">The real provider flow will include credential attestation, terms, directory policies, billing, and an edit/update portal.</p></div>
+  </dialog>
+
+  <script src="app.js"></script><script src="warm.js"></script>
+</body>
+</html>

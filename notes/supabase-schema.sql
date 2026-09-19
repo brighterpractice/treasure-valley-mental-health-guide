@@ -1,0 +1,2 @@
+-- SUPERSEDED: do not execute this prototype schema.
+-- Use supabase/migrations/202609190001_provider_foundation.sql instead.

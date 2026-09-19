@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Professional Referral | Treasure Valley Mental Health Guide</title>
+  <link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="warm-theme.css"></head>
+<body>
+  <header class="site-header">
+    <div class="shell nav-wrap">
+      <a class="brand" href="index.html"><span class="brand-mark">TV</span><span><strong>Treasure Valley</strong><small>Mental Health Guide</small></span></a>
+      <nav class="primary-nav"><a href="index.html#resources">Resources</a><a href="index.html#find">Find a Counselor</a><a href="index.html#providers">For Providers</a></nav>
+    </div>
+  </header>
+  <main>
+    <section class="hero" style="padding-bottom:45px">
+      <div class="shell" style="max-width:900px">
+        <div class="eyebrow">Professional referral pathway</div>
+        <h1 style="font-size:clamp(42px,6vw,68px)">Help someone find an appropriate local provider.</h1>
+        <p class="hero-copy">This prototype demonstrates a privacy-conscious referral landing page that a physician, school counselor, therapist, community organization, or other referral partner could share by link or QR code.</p>
+      </div>
+    </section>
+    <section class="section" style="padding-top:20px">
+      <div class="shell split-grid" style="align-items:start">
+        <div class="about-card">
+          <div class="eyebrow">Referral source</div>
+          <h2 style="font-size:34px">Track the source, not the client.</h2>
+          <p>The link can carry a non-sensitive source code such as <code>?ref=st-lukes-card-a</code>. Analytics can record that the referral channel generated a visit without collecting the visitor’s name, diagnosis, reason for treatment, or other clinical details.</p>
+          <div class="privacy-note" id="referralSource">No referral code detected. This visit would be attributed as direct.</div>
+        </div>
+        <div class="about-card">
+          <h3>Choose the next step</h3>
+          <p>Referral partners can send people to the full matching tool rather than selecting a counselor on their behalf.</p>
+          <a class="button primary" href="index.html#find" style="margin-right:8px">Find a counselor</a>
+          <a class="button secondary" href="index.html#resources">Browse resources</a>
+          <p class="microcopy" style="margin-top:18px">Production version: generate unique QR codes for offices/cards, preserve first-touch attribution, and record only non-sensitive campaign metadata.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+  <footer class="site-footer"><div class="shell"><strong>Treasure Valley Mental Health Guide</strong><p style="color:#9fb5b1">Prototype referral pathway.</p></div></footer>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const ref = params.get('ref');
+    if (ref) {
+      localStorage.setItem('tvmhg_first_ref', localStorage.getItem('tvmhg_first_ref') || ref);
+      document.getElementById('referralSource').textContent = `Prototype attribution: ${ref}`;
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Provider Portal | Treasure Valley Mental Health Guide</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="align-theme.css" />
+<link rel="stylesheet" href="warm-theme.css"></head>
+<body class="portal-body">
+<div class="portal-shell">
+  <aside class="portal-sidebar">
+    <a class="brand portal-brand" href="index.html"><span class="brand-mark">⌁</span><span><strong>Treasure Valley</strong><small>Mental Health Guide</small></span></a>
+    <div class="portal-account"><div class="avatar-sm">LB</div><div><strong>Lisa Bright</strong><small>Bright Hope Therapy</small></div></div>
+    <nav class="portal-nav">
+      <button class="active" data-panel="overview">Overview</button>
+      <button data-panel="profile">My Profile</button>
+      <button data-panel="media">Photos & Media <span class="pro-dot">ADV</span></button>
+      <button data-panel="analytics">Analytics <span class="pro-dot">ADV</span></button>
+      <button data-panel="qr">QR Code <span class="pro-dot">ADV</span></button>
+      <button data-panel="billing">Plan & Billing</button>
+    </nav>
+    <div class="portal-sidebar-bottom"><a href="index.html">← View public guide</a><span>Prototype portal</span></div>
+  </aside>
+
+  <main class="portal-main">
+    <header class="portal-topbar"><div><span class="eyebrow">Provider portal</span><h2 id="panelTitle">Overview</h2></div><div class="portal-actions"><span class="status-pill">● Published</span><button class="button secondary small-btn" id="previewBtn">Preview profile</button></div></header>
+
+    <section class="portal-panel active" id="panel-overview">
+      <div class="dashboard-grid top-metrics">
+        <article class="metric-card"><span>Profile completeness</span><strong>92%</strong><div class="progress"><i style="width:92%"></i></div><small>Add one more office photo to reach 100%.</small></article>
+        <article class="metric-card"><span>Plan</span><strong id="planMetric">Advanced</strong><small>$49/year · renews annually</small><button class="text-button" data-jump="billing">Manage plan</button></article>
+        <article class="metric-card"><span>Last verified</span><strong>Sep 19</strong><small>Information confirmed today.</small><button class="text-button">Confirm again</button></article>
+      </div>
+      <div class="portal-card quick-tasks"><div class="card-heading"><div><span class="eyebrow">Profile maintenance</span><h3>Keep your listing current</h3></div><span class="badge subtle">Self-service</span></div><div class="task-grid"><button data-jump="profile"><b>Availability</b><span>Accepting new clients</span></button><button data-jump="profile"><b>Insurance</b><span>2 plans + self-pay</span></button><button data-jump="profile"><b>Specialties</b><span>3 selected</span></button><button data-jump="media"><b>Media</b><span>1 photo · no video</span></button></div></div>
+      <div class="portal-card advanced-teaser"><div><span class="eyebrow">Advanced insight</span><h3>People are finding this profile primarily for trauma and EMDR.</h3><p>Search-intent analytics use aggregated structured filters, not identifiable visitor histories or sensitive raw search text.</p></div><div class="teaser-stats"><span><b>84</b> views</span><span><b>52</b> visitors</span><span><b>17</b> site clicks</span></div></div>
+    </section>
+
+    <section class="portal-panel" id="panel-profile">
+      <div class="portal-card"><div class="card-heading"><div><span class="eyebrow">Public information</span><h3>Edit profile</h3></div><button class="button primary small-btn" id="saveProfile">Save changes</button></div>
+        <div class="form-grid">
+          <label>First name<input class="input" value="Lisa"></label><label>Last name<input class="input" value="Bright"></label>
+          <label>Credentials<input class="input" value="LCPC"></label><label>Practice name<input class="input" value="Bright Hope Therapy"></label>
+          <label>Primary city<select class="input"><option selected>Meridian</option><option>Boise</option><option>Eagle</option><option>Nampa</option></select></label><label>Years in practice<input class="input" type="number" value="8"></label>
+          <label class="span-2">Short bio<textarea class="input textarea">Individual counseling for adults with an emphasis on trauma, anxiety, life transitions, and holistic wellness. EMDR trained.</textarea></label>
+          <label>Website<input class="input" value="https://brighthopetherapy.com"></label><label>Scheduling URL<input class="input" placeholder="https://..."></label>
+          <label>Availability<select class="input"><option selected>Accepting new clients</option><option>Waitlist</option><option>Not accepting</option></select></label><label>Visit type<select class="input"><option selected>In-person & telehealth</option><option>In-person</option><option>Telehealth</option></select></label>
+        </div>
+        <div class="edit-block"><h4>Specialties</h4><div class="chip-options static-chips"><button class="filter-chip active">Trauma</button><button class="filter-chip active">Anxiety</button><button class="filter-chip active">Life Transitions</button><button class="filter-chip">Grief</button><button class="filter-chip">OCD</button><button class="filter-chip">Relationships</button></div></div>
+        <div class="edit-block"><h4>Modalities / approaches</h4><div class="chip-options static-chips"><button class="filter-chip active">EMDR</button><button class="filter-chip active">Person-centered</button><button class="filter-chip">CBT</button><button class="filter-chip">ACT</button><button class="filter-chip">DBT-informed</button></div></div>
+      </div>
+    </section>
+
+    <section class="portal-panel" id="panel-media">
+      <div class="portal-card"><div class="card-heading"><div><span class="eyebrow">Advanced feature</span><h3>Photos & video</h3></div><span class="badge">Advanced</span></div><p>Headshot plus additional office/practice imagery. Video is embedded from a supported video URL rather than hosted directly.</p>
+        <div class="media-grid"><div class="media-upload"><div class="avatar-xl">LB</div><b>Primary headshot</b><button class="text-button">Replace</button></div><div class="media-upload empty"><span>＋</span><b>Add office photo</b><small>JPG, PNG, WebP</small></div><div class="media-upload empty"><span>＋</span><b>Add second photo</b><small>Advanced plan</small></div></div>
+        <label class="video-field">Video URL<input class="input" placeholder="YouTube or Vimeo URL"><small>The prototype stores only the URL; production can validate supported providers before embedding.</small></label>
+      </div>
+    </section>
+
+    <section class="portal-panel" id="panel-analytics">
+      <div class="analytics-header"><div><span class="eyebrow">Advanced analytics</span><h3>Profile performance</h3></div><select class="input compact-select"><option>Last 30 days</option><option>Last 90 days</option><option>This year</option></select></div>
+      <div class="dashboard-grid analytics-metrics"><article class="metric-card"><span>Profile views</span><strong>84</strong><small>+18 vs prior period</small></article><article class="metric-card"><span>Unique visitors</span><strong>52</strong><small>Aggregated, privacy-conscious count</small></article><article class="metric-card"><span>Website clicks</span><strong>17</strong><small>20.2% of profile views</small></article><article class="metric-card"><span>Contact / schedule clicks</span><strong>9</strong><small>10.7% of profile views</small></article></div>
+      <div class="analytics-grid">
+        <article class="portal-card"><div class="card-heading"><h3>Top specialty searches</h3><small>Minimum 5 visitors per category</small></div><div class="bar-list"><div><span>Trauma</span><i style="--w:88%"></i><b>22</b></div><div><span>Anxiety</span><i style="--w:68%"></i><b>17</b></div><div><span>Life transitions</span><i style="--w:40%"></i><b>10</b></div></div></article>
+        <article class="portal-card"><div class="card-heading"><h3>Top modality searches</h3><small>Structured filters only</small></div><div class="bar-list"><div><span>EMDR</span><i style="--w:100%"></i><b>19</b></div><div><span>Person-centered</span><i style="--w:42%"></i><b>8</b></div><div><span>CBT</span><i style="--w:31%"></i><b>6</b></div></div></article>
+        <article class="portal-card"><div class="card-heading"><h3>How visitors arrived</h3></div><div class="source-list"><div><span>Google / organic search</span><b>21</b></div><div><span>Resource pages</span><b>14</b></div><div><span>Directory search</span><b>11</b></div><div><span>Referral QR / link</span><b>6</b></div></div></article>
+        <article class="portal-card"><div class="card-heading"><h3>Common access preferences</h3></div><div class="source-list"><div><span>Meridian area</span><b>24</b></div><div><span>In-person</span><b>18</b></div><div><span>Telehealth</span><b>12</b></div><div><span>Blue Cross of Idaho</span><b>9</b></div></div></article>
+      </div>
+      <div class="privacy-banner"><b>Privacy design:</b> analytics are aggregated. Providers do not see visitor identities, individual search histories, raw sensitive free-text queries, or categories below the configured privacy threshold.</div>
+    </section>
+
+    <section class="portal-panel" id="panel-qr">
+      <div class="portal-card qr-layout"><div><span class="eyebrow">Advanced feature</span><h3>Your profile QR code</h3><p>Use this on business cards, handouts, office materials, or networking materials. Scans can be counted in profile analytics without attaching client identity.</p><div class="code-box">tvmh.guide/p/bright-hope</div><button class="button primary">Download QR code</button><button class="button secondary">Copy profile link</button></div><div class="qr-demo" aria-label="QR code placeholder"><div class="qr-pattern">▦</div><small>Prototype QR</small></div></div>
+    </section>
+
+    <section class="portal-panel" id="panel-billing">
+      <div class="portal-card"><div class="card-heading"><div><span class="eyebrow">Annual plan</span><h3 id="billingPlanName">Advanced · $49/year</h3></div><span class="status-pill">Active</span></div><p>Production checkout will be handed off to the reusable Brighter Sites payment service backed by your existing Square account.</p><div class="billing-options"><button class="plan-switch" data-plan="basic"><span><b>Basic</b><small>Core self-service listing</small></span><strong>$12/year</strong></button><button class="plan-switch selected" data-plan="advanced"><span><b>Advanced</b><small>Media, QR and analytics</small></span><strong>$49/year</strong></button></div><div class="billing-row"><span>Next renewal</span><strong>September 19, 2027</strong></div><div class="billing-row"><span>Payment processor</span><strong>Square via Brighter Sites</strong></div><div class="billing-row"><span>Auto-renewal</span><strong>Planned</strong></div><button class="button primary" id="checkoutDemo">Open checkout preview</button></div>
+    </section>
+  </main>
+</div>
+
+<dialog class="profile-dialog" id="checkoutDialog"><button class="dialog-close" id="closeCheckout">×</button><div><div class="eyebrow">Payment handoff prototype</div><h2>Secure annual checkout</h2><p>The live version will create the checkout through the Brighter Sites payment API and redirect to Square-hosted checkout. No card details are stored by the directory.</p><div class="checkout-summary"><span>Treasure Valley Mental Health Guide</span><strong id="checkoutItem">Advanced Provider Listing — $49/year</strong></div><div class="flow-line"><span>Provider portal</span><b>→</b><span>Brighter Sites payment API</span><b>→</b><span>Square checkout</span><b>→</b><span>Webhook</span><b>→</b><span>Supabase plan update</span></div><button class="button primary wide" disabled>Continue to Square (prototype)</button></div></dialog>
+<script src="portal.js"></script>
+</body>
+</html>
