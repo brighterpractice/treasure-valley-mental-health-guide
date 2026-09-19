@@ -546,3 +546,17 @@ body {
   .advanced-profile-two-col{grid-template-columns:1fr}
   .advanced-profile-card{padding:22px}
 }
+
+
+/* Advanced video + QR tools */
+.advanced-panel-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.qr-builder{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:28px;align-items:start;margin-top:22px}
+.qr-controls{display:grid;gap:14px}
+.qr-controls label{display:grid;gap:7px;font-weight:700;color:var(--ink-2)}
+.qr-preview{min-height:320px;border:1px solid var(--line);border-radius:22px;background:#fff;display:grid;place-items:center;padding:18px;text-align:center}
+.qr-preview canvas{max-width:100%;height:auto}
+.qr-preview small{color:var(--muted)}
+.advanced-profile-video-card{overflow:hidden}
+.advanced-video-wrap{position:relative;width:100%;aspect-ratio:16/9;border-radius:20px;overflow:hidden;background:#102b28}
+.advanced-video-wrap iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+@media(max-width:760px){.qr-builder{grid-template-columns:1fr}.qr-preview{min-height:290px}}
