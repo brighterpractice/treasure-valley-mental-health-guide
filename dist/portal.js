@@ -105,7 +105,9 @@ function populateProfile(row) {
     websiteUrl: row?.website_url,
     availability: row?.availability || 'Not specified',
     visitType: (row?.visit_types || [])[0] || 'In-person & telehealth',
-    providerGender: row?.provider_gender || ''
+    providerGender: row?.provider_gender || '',
+    licenseState: row?.license_state || '',
+    licenseNumber: row?.license_number || ''
   });
   setChips('specialties', row?.specialties || []);
   setChips('approaches', row?.approaches || []);
@@ -140,6 +142,8 @@ function formPayload() {
     availability: document.getElementById('availability').value,
     visit_types: [document.getElementById('visitType').value],
     provider_gender: document.getElementById('providerGender').value,
+    license_state: document.getElementById('licenseState').value.trim(),
+    license_number: document.getElementById('licenseNumber').value.trim(),
     populations: [...getChips('populations'), ...getCustomTags('customPopulations')],
     insurance: [...getChips('insurance'), ...getCustomTags('customInsurance')],
     specialties: [...getChips('specialties'), ...getCustomTags('customSpecialties')],
