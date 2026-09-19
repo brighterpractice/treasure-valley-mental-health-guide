@@ -1,45 +1,59 @@
-# Production SEO activation
+# Production SEO domain configuration
 
-The public site is intentionally not canonicalized to the temporary Cloudflare Pages hostname.
+## Canonical production domain
+Confirmed production origin:
 
-## Planned production host
-The current product notes reference `TVMentalHealthGuide.org`. Confirm that this is the actual connected production domain before activating canonical URLs.
+`https://tvmentalhealthguide.org`
 
-## When the production domain is connected
-1. Add absolute `<link rel="canonical">` tags to every public page.
-2. Add absolute `og:url` values.
-3. Add a production social-share image and absolute `og:image` / `twitter:image` URLs.
-4. Generate `dist/sitemap.xml` using the production origin.
-5. Add `Sitemap: https://<production-domain>/sitemap.xml` to `dist/robots.txt`.
-6. Redirect the `*.pages.dev` hostname and any alternate domains to the production host where practical.
-7. Add the production domain to Google Search Console and Bing Webmaster Tools.
-8. Validate structured data, mobile rendering, Core Web Vitals, redirects, 404s, and sitemap fetches.
+The site also owns:
 
-## Public pages to include in the initial sitemap
-- /
-- /find-counselor.html
-- /resources.html
-- /about.html
-- /editorial-policy.html
-- /directory-standards.html
-- /privacy.html
-- /providers.html
-- /ptsd.html
-- /trauma.html
-- /emdr.html
-- /anxiety.html
-- /depression.html
-- /grief.html
-- /relationships.html
-- /psychiatry-medication.html
-- /telehealth.html
-- /choosing-a-counselor.html
-- /lower-cost-care.html
-- /community-assistance.html
-- /domestic-violence-safety.html
-- /substance-use.html
-- /crisis-help.html
+`https://tvmentalhealthguide.com`
 
-Provider profile URLs should be added only after permanent, crawlable provider slugs are implemented. Do not add provider-login, dashboard, or admin pages to the sitemap.
+The `.com` domain should redirect permanently to the matching path on the `.org` domain.
 
-Referral campaign pages should remain noindex unless a separate organic-search use case is intentionally created.
+## Redirect behavior to configure in Cloudflare
+
+Use permanent 301 redirects that preserve the path and query string:
+
+- `tvmentalhealthguide.com/*` → `https://tvmentalhealthguide.org/<same-path>`
+- `www.tvmentalhealthguide.com/*` → `https://tvmentalhealthguide.org/<same-path>`
+- `www.tvmentalhealthguide.org/*` → `https://tvmentalhealthguide.org/<same-path>`
+- the temporary `*.pages.dev` hostname → `https://tvmentalhealthguide.org/<same-path>`
+
+Do not serve duplicate indexable copies of the site from those alternate hosts.
+
+## Production SEO now in the repository
+
+- Absolute canonical URLs on indexable public pages
+- Absolute `og:url` values
+- Large social-preview metadata using the site hero image
+- `dist/sitemap.xml` using the `.org` origin
+- `Sitemap: https://tvmentalhealthguide.org/sitemap.xml` in `robots.txt`
+- JSON-LD for the homepage, directory, resource hub, health resource pages, provider sales page, and trust pages
+- Private provider/admin pages protected with `noindex`
+- UUID-based Advanced provider pages remain `noindex,follow` until permanent provider slugs are implemented
+- Referral attribution page remains `noindex,follow`
+
+## Initial sitemap scope
+
+The sitemap contains the public guide, counselor search, resources hub, trust pages, provider information page, and the current mental-health/resource library.
+
+It intentionally excludes:
+- provider login
+- provider dashboard
+- admin review
+- referral attribution page
+- UUID-based provider profile URLs
+
+## Remaining launch tasks
+
+1. Attach `tvmentalhealthguide.org` as the production custom domain for the Pages project.
+2. Attach `tvmentalhealthguide.com` and configure the 301 redirect to `.org`.
+3. Redirect `www` aliases to the apex `.org`.
+4. Redirect or otherwise prevent indexing of the temporary Pages hostname.
+5. Verify HTTPS and redirect chains after DNS/custom-domain activation.
+6. Submit `https://tvmentalhealthguide.org/sitemap.xml` to Google Search Console and Bing Webmaster Tools.
+7. Validate structured data and social previews on the live production domain.
+8. Run Lighthouse/Core Web Vitals against the live deployment.
+9. Implement permanent provider slugs before provider profile pages are indexed.
+10. Replace the current public-geocoder dependency with a production-ready geocoding arrangement and update the Privacy page if the data flow changes.
