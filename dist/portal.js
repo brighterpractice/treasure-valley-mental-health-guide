@@ -240,6 +240,28 @@ async function saveAdvanced(panelMessageId, successText) {
   if (ok) sayPanel(panelMessageId, successText, 'success');
   return ok;
 }
+function assignQrDestination(kind) {
+  const input = document.getElementById('qrDestinationInput');
+  const raw = input?.value || '';
+  const normalized = normalizeWebsiteUrl(raw);
+  if (!normalized) {
+    sayPanel('qrMessage', 'Enter a URL first, then choose where to use it.', 'error');
+    input?.focus();
+    return;
+  }
+  if (kind === 'portal') {
+    const portalInput = document.getElementById('clientPortalUrl');
+    if (portalInput) portalInput.value = normalized;
+    renderQr('portal');
+    sayPanel('qrMessage', 'Client / scheduling portal QR updated. Save QR settings to keep it.', 'success');
+  } else {
+    const websiteInput = document.getElementById('websiteUrl');
+    if (websiteInput) websiteInput.value = normalized;
+    renderQr('website');
+    sayPanel('qrMessage', 'Practice website QR updated. Save QR settings to keep it.', 'success');
+  }
+}
+
 function qrUrl(kind) {
   const raw = kind === 'portal'
     ? (document.getElementById('clientPortalUrl')?.value || '')
@@ -316,8 +338,14 @@ document.getElementById('saveMedia')?.addEventListener('click', () => saveAdvanc
 document.getElementById('saveQrSettings')?.addEventListener('click', async () => {
   if (await saveAdvanced('qrMessage', 'QR settings saved.')) renderQrCodes();
 });
-document.getElementById('clientPortalUrl')?.addEventListener('input', () => renderQr('portal'));
-document.getElementById('websiteUrl')?.addEventListener('input', () => renderQr('website'));
+document.getElementById('assignWebsiteQr')?.addEventListener('click', () => assignQrDestination('website'));
+document.getElementById('assignPortalQr')?.addEventListener('click', () => assignQrDestination('portal'));
+document.getElementById('qrDestinationInput')?.addEventListener('keydown', event => {
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    sayPanel('qrMessage', 'Choose Practice Website or Client / Scheduling Portal.', '');
+  }
+});
 document.getElementById('copyWebsiteQr')?.addEventListener('click', () => copyQr('website'));
 document.getElementById('copyPortalQr')?.addEventListener('click', () => copyQr('portal'));
 document.getElementById('downloadWebsiteQr')?.addEventListener('click', () => downloadQr('website'));
