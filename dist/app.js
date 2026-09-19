@@ -8,6 +8,130 @@ const supabase = cfg?.url && cfg?.publishableKey
 let providers = [];
 let directoryMode = 'loading';
 
+const demoProviders = [
+  {
+    id: 'demo-bright-hope',
+    name: 'Lisa Bright',
+    credentials: 'LCPC',
+    practice: 'Bright Hope Therapy',
+    city: 'Meridian',
+    gender: 'Female',
+    specialties: ['Anxiety', 'Trauma', 'Life Transitions'],
+    approaches: ['EMDR', 'Person-centered'],
+    services: ['Individual counseling'],
+    populations: ['Adults'],
+    insurance: ['Self-pay', 'Blue Cross of Idaho'],
+    visits: ['In-person', 'Telehealth'],
+    availability: 'Accepting new clients',
+    years: 8,
+    bio: 'Individual counseling for adults with an emphasis on trauma, anxiety, life transitions, and holistic wellness. EMDR trained.',
+    website: '',
+    verifiedLabel: 'Demo profile',
+    isDemo: true
+  },
+  {
+    id: 'demo-riverbend',
+    name: 'Morgan Reed',
+    credentials: 'LCSW',
+    practice: 'Riverbend Counseling',
+    city: 'Boise',
+    gender: 'Female',
+    specialties: ['Anxiety', 'Grief', 'Relationships'],
+    approaches: ['CBT', 'ACT'],
+    services: ['Individual counseling', 'Couples counseling'],
+    populations: ['Adults', 'Couples'],
+    insurance: ['Regence', 'Aetna', 'Self-pay'],
+    visits: ['In-person', 'Telehealth'],
+    availability: 'Accepting new clients',
+    years: 12,
+    bio: 'Prototype provider focused on anxiety, grief, relationship stress, and adult life changes.',
+    website: '',
+    verifiedLabel: 'Demo profile',
+    isDemo: true
+  },
+  {
+    id: 'demo-foothills',
+    name: 'Daniel Cho',
+    credentials: 'LMFT',
+    practice: 'Foothills Family Counseling',
+    city: 'Eagle',
+    gender: 'Male',
+    specialties: ['Relationships', 'Life Transitions'],
+    approaches: ['CBT', 'Person-centered'],
+    services: ['Couples counseling', 'Family counseling'],
+    populations: ['Adults', 'Couples', 'Families'],
+    insurance: ['Blue Cross of Idaho', 'PacificSource', 'Self-pay'],
+    visits: ['In-person'],
+    availability: 'Waitlist',
+    years: 16,
+    bio: 'Prototype provider serving adults, couples, and families around relationship concerns and major life transitions.',
+    website: '',
+    verifiedLabel: 'Demo profile',
+    isDemo: true
+  },
+  {
+    id: 'demo-sagebrush',
+    name: 'Elena Torres',
+    credentials: 'LPC',
+    practice: 'Sagebrush Counseling Collective',
+    city: 'Nampa',
+    gender: 'Female',
+    specialties: ['Trauma', 'Anxiety', 'OCD'],
+    approaches: ['EMDR', 'CBT'],
+    services: ['Individual counseling'],
+    populations: ['Adults', 'Teens'],
+    insurance: ['PacificSource', 'Self-pay'],
+    visits: ['In-person', 'Telehealth'],
+    availability: 'Accepting new clients',
+    years: 6,
+    bio: 'Prototype provider working with trauma, anxiety, and OCD concerns in adults and teens.',
+    website: '',
+    verifiedLabel: 'Demo profile',
+    isDemo: true
+  },
+  {
+    id: 'demo-westbench',
+    name: 'Avery Johnson',
+    credentials: 'LCSW',
+    practice: 'West Bench Counseling',
+    city: 'Boise',
+    gender: 'Nonbinary',
+    specialties: ['Anxiety', 'Life Transitions', 'Grief'],
+    approaches: ['ACT', 'DBT-informed'],
+    services: ['Individual counseling'],
+    populations: ['Adults', 'Teens'],
+    insurance: ['Aetna', 'Regence', 'Self-pay'],
+    visits: ['Telehealth'],
+    availability: 'Accepting new clients',
+    years: 9,
+    bio: 'Prototype provider offering telehealth support for anxiety, grief, and life transitions.',
+    website: '',
+    verifiedLabel: 'Demo profile',
+    isDemo: true
+  },
+  {
+    id: 'demo-canyon-path',
+    name: 'Rachel Nguyen',
+    credentials: 'LCPC',
+    practice: 'Canyon Path Therapy',
+    city: 'Caldwell',
+    gender: 'Female',
+    specialties: ['Trauma', 'Grief'],
+    approaches: ['EMDR', 'DBT-informed'],
+    services: ['Individual counseling'],
+    populations: ['Adults'],
+    insurance: ['Blue Cross of Idaho', 'Self-pay'],
+    visits: ['In-person', 'Telehealth'],
+    availability: 'Waitlist',
+    years: 11,
+    bio: 'Prototype provider focused on adult trauma recovery, grief, and coping skills.',
+    website: '',
+    verifiedLabel: 'Demo profile',
+    isDemo: true
+  }
+];
+
+
 function normalizeVisitTypes(values = []) {
   const normalized = new Set();
   for (const value of values || []) {
@@ -46,7 +170,8 @@ function mapDirectoryProfile(row) {
     years: Number.isFinite(row.years_in_practice) ? row.years_in_practice : null,
     bio: row.short_bio || '',
     website: row.website_url || '',
-    verifiedLabel: formatVerifiedDate(row.last_verified_at)
+    verifiedLabel: formatVerifiedDate(row.last_verified_at),
+    isDemo: false
   };
 }
 
@@ -59,8 +184,8 @@ async function loadProviders() {
 
   if (!supabase) {
     directoryMode = 'error';
-    providers = [];
-    if (note) note.textContent = 'The provider directory is temporarily unavailable.';
+    providers = [...demoProviders];
+    if (note) note.textContent = 'Demo profiles are shown while the live provider directory is temporarily unavailable.';
     render();
     return;
   }
@@ -73,18 +198,19 @@ async function loadProviders() {
   if (error) {
     console.error('Unable to load published provider profiles:', error);
     directoryMode = 'error';
-    providers = [];
-    if (note) note.textContent = 'The provider directory is temporarily unavailable.';
+    providers = [...demoProviders];
+    if (note) note.textContent = 'Demo profiles are shown while the live provider directory is temporarily unavailable.';
     render();
     return;
   }
 
-  providers = (data || []).map(mapDirectoryProfile);
+  const publishedProviders = (data || []).map(mapDirectoryProfile);
+  providers = [...demoProviders, ...publishedProviders];
   directoryMode = 'live';
   if (note) {
-    note.textContent = providers.length
-      ? 'Published provider profiles are reviewed before appearing in the guide.'
-      : 'No provider profiles are published yet.';
+    note.textContent = publishedProviders.length
+      ? 'Published provider profiles appear alongside clearly labeled demo profiles during development.'
+      : 'Demo profiles are shown while no provider profiles are published yet.';
   }
   render();
 }
@@ -321,7 +447,7 @@ function openProfile(id) {
   els.profileDialogContent.innerHTML = `
     <div class="dialog-hero">
       <div class="provider-avatar">${initials(p.name)}</div>
-      <div><div class="eyebrow">Published provider profile</div><h2>${escapeHtml(p.name)}${p.credentials ? `, ${escapeHtml(p.credentials)}` : ''}</h2><p>${escapeHtml(p.practice)} · ${escapeHtml(p.city)}</p></div>
+      <div><div class="eyebrow">${p.isDemo ? 'Demo profile' : 'Published provider profile'}</div><h2>${escapeHtml(p.name)}${p.credentials ? `, ${escapeHtml(p.credentials)}` : ''}</h2><p>${escapeHtml(p.practice)} · ${escapeHtml(p.city)}</p></div>
     </div>
     <p>${escapeHtml(p.bio)}</p>
     <div class="profile-detail-grid">
