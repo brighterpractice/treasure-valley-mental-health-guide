@@ -307,7 +307,7 @@ function calculateMatch(provider) {
 
   if (desiredClinical.size || rawTerms.length) {
     possible += 35;
-    const providerText = `${provider.name} ${provider.practice} ${provider.city} ${provider.specialties.join(' ')} ${provider.approaches.join(' ')} ${provider.services.join(' ')} ${provider.bio}`.toLowerCase();
+    const providerText = `${provider.name} ${provider.practice} ${provider.city} ${provider.specialties.join(' ')} ${provider.approaches.join(' ')} ${provider.services.join(' ')} ${provider.populations.join(' ')} ${provider.insurance.join(' ')} ${provider.bio}`.toLowerCase();
     const clinicalHits = [...desiredClinical].filter(t => provider.specialties.includes(t) || provider.approaches.includes(t));
     const rawHits = rawTerms.filter(t => providerText.includes(t));
     const requestedCount = Math.max(1, desiredClinical.size + rawTerms.length);
@@ -380,7 +380,7 @@ function render() {
 
   if (state.search) {
     rows = rows.filter(({ provider, match }) => {
-      const text = `${provider.name} ${provider.practice} ${provider.city} ${provider.specialties.join(' ')} ${provider.approaches.join(' ')} ${provider.services.join(' ')} ${provider.bio}`.toLowerCase();
+      const text = `${provider.name} ${provider.practice} ${provider.city} ${provider.specialties.join(' ')} ${provider.approaches.join(' ')} ${provider.services.join(' ')} ${provider.populations.join(' ')} ${provider.insurance.join(' ')} ${provider.bio}`.toLowerCase();
       const terms = normalizedSearchTerms(state.search);
       return match.matched.length > 0 || terms.some(term => text.includes(String(term).toLowerCase()));
     });
@@ -458,6 +458,7 @@ function openProfile(id) {
       <div><span>Visits</span><strong>${p.visits.length ? p.visits.map(escapeHtml).join(', ') : 'Not specified'}</strong></div>
       <div><span>Payment</span><strong>${p.insurance.length ? p.insurance.map(escapeHtml).join(', ') : 'Not specified'}</strong></div>
       <div><span>Availability</span><strong>${escapeHtml(p.availability)}</strong></div>
+      <div><span>Provider gender</span><strong>${p.gender ? escapeHtml(p.gender) : 'Not specified'}</strong></div>
       <div><span>Verification</span><strong>${escapeHtml(p.verifiedLabel)}</strong></div>
     </div>
     ${p.website ? `<p><a class="button secondary" href="${escapeHtml(p.website)}" target="_blank" rel="noopener noreferrer">Visit provider website ↗</a></p>` : ''}`;
