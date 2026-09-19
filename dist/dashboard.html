@@ -55,9 +55,10 @@
     </section>
 
     <section class="portal-panel" id="panel-media">
-      <div class="portal-card"><div class="card-heading"><div><span class="eyebrow">Advanced feature</span><h3>Photos & video</h3></div><span class="badge">Advanced</span></div><p>Headshot plus additional office/practice imagery. Video is embedded from a supported video URL rather than hosted directly.</p>
+      <div class="portal-card"><div class="card-heading"><div><span class="eyebrow">Advanced feature</span><h3>Photos & video</h3><p id="mediaMessage" class="auth-message" role="status" aria-live="polite"></p></div><span class="badge">Advanced</span></div><p>Use a YouTube introduction video on your expanded public profile. The video is embedded rather than uploaded to the directory.</p>
         <div class="media-grid"><div class="media-upload"><div class="avatar-xl">LB</div><b>Primary headshot</b><button class="text-button">Replace</button></div><div class="media-upload empty"><span>＋</span><b>Add office photo</b><small>JPG, PNG, WebP</small></div><div class="media-upload empty"><span>＋</span><b>Add second photo</b><small>Advanced plan</small></div></div>
-        <label class="video-field">Video URL<input class="input" placeholder="YouTube or Vimeo URL"><small>The prototype stores only the URL; production can validate supported providers before embedding.</small></label>
+        <label class="video-field">YouTube video URL<input id="videoUrl" class="input" type="url" placeholder="https://www.youtube.com/watch?v=..."><small>Supports standard YouTube, youtu.be, Shorts, and embed links. The public page uses YouTube's privacy-enhanced player.</small></label>
+        <div class="advanced-panel-actions"><button class="button primary" type="button" id="saveMedia">Save video</button></div>
       </div>
     </section>
 
@@ -74,7 +75,19 @@
     </section>
 
     <section class="portal-panel" id="panel-qr">
-      <div class="portal-card qr-layout"><div><span class="eyebrow">Advanced feature</span><h3>Your profile QR code</h3><p>Use this on business cards, handouts, office materials, or networking materials. Scans can be counted in profile analytics without attaching client identity.</p><div class="code-box">tvmh.guide/p/bright-hope</div><button class="button primary">Download QR code</button><button class="button secondary">Copy profile link</button></div><div class="qr-demo" aria-label="QR code placeholder"><div class="qr-pattern">▦</div><small>Prototype QR</small></div></div>
+      <div class="portal-card"><div class="card-heading"><div><span class="eyebrow">Advanced feature</span><h3>QR code generator</h3><p id="qrMessage" class="auth-message" role="status" aria-live="polite"></p></div><span class="badge">Advanced</span></div>
+        <p>Create a QR code for your public website or client portal. The QR is generated in your browser; the destination URL is not sent to a separate QR service.</p>
+        <div class="qr-builder">
+          <div class="qr-controls">
+            <label>Client portal URL<input id="clientPortalUrl" class="input" type="url" placeholder="https://portal.example.com"></label>
+            <label>QR destination<select id="qrTarget" class="input"><option value="website">Practice website</option><option value="portal">Client portal</option></select></label>
+            <div class="code-box" id="qrTargetValue">Choose a destination to preview its QR code.</div>
+            <div class="advanced-panel-actions"><button class="button secondary" type="button" id="saveQrLinks">Save client portal</button><button class="button primary" type="button" id="generateQr">Generate QR</button></div>
+            <div class="advanced-panel-actions"><button class="button secondary" type="button" id="copyQrLink">Copy destination</button><button class="button secondary" type="button" id="downloadQr">Download PNG</button></div>
+          </div>
+          <div class="qr-preview" aria-live="polite"><canvas id="qrCanvas" width="280" height="280" aria-label="Generated QR code"></canvas><small id="qrCaption">QR preview</small></div>
+        </div>
+      </div>
     </section>
 
     <section class="portal-panel" id="panel-billing">
