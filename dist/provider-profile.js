@@ -20,6 +20,8 @@ const demoAdvancedProfiles = {
     license_state: 'Idaho',
     license_number: '',
     website_url: '',
+    video_url: '',
+    client_portal_url: '',
     availability: 'Accepting new clients',
     visit_types: ['In-person', 'Telehealth'],
     populations: ['Adults'],
@@ -48,10 +50,30 @@ function verified(value, demo) {
   return Number.isNaN(date.getTime()) ? 'Published profile' : `Verified ${date.toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'})}`;
 }
 
+function youtubeEmbedUrl(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+  try {
+    const url = new URL(raw);
+    const host = url.hostname.replace(/^www\./i, '').replace(/^m\./i, '').toLowerCase();
+    let id = '';
+    if (host === 'youtu.be') id = url.pathname.split('/').filter(Boolean)[0] || '';
+    if (host === 'youtube.com' || host.endsWith('.youtube.com')) {
+      if (url.pathname === '/watch') id = url.searchParams.get('v') || '';
+      else if (/^\/(shorts|embed)\//.test(url.pathname)) id = url.pathname.split('/').filter(Boolean)[1] || '';
+    }
+    return /^[A-Za-z0-9_-]{11}$/.test(id) ? `https://www.youtube-nocookie.com/embed/${id}` : '';
+  } catch {
+    return '';
+  }
+}
+
 function renderProfile(p) {
   const fullName = `${p.first_name || ''} ${p.last_name || ''}`.trim();
   document.title = `${fullName || 'Provider'} | Treasure Valley Mental Health Guide`;
   const website = p.website_url ? `<a class="button primary" href="${esc(p.website_url)}" target="_blank" rel="noopener noreferrer">Visit provider website ↗</a>` : '';
+  const clientPortal = p.client_portal_url ? `<a class="button secondary" href="${esc(p.client_portal_url)}" target="_blank" rel="noopener noreferrer">Client portal ↗</a>` : '';
+  const videoEmbed = youtubeEmbedUrl(p.video_url);
   const license = p.license_number
     ? `<div class="advanced-profile-detail"><span>State license</span><strong>${esc(p.license_state || 'State')} · ${esc(p.license_number)}</strong></div>`
     : '';
@@ -74,6 +96,7 @@ function renderProfile(p) {
         <strong>${esc(p.practice_name || fullName)}</strong>
         <small>${esc(p.primary_city || '')}</small>
         ${website}
+        ${clientPortal}
         <a class="button secondary" href="index.html#find">Back to directory</a>
       </aside>
     </section>
@@ -85,6 +108,12 @@ function renderProfile(p) {
           <h2>A little more about this provider.</h2>
           <p class="advanced-profile-bio">${esc(p.short_bio || 'No bio has been added yet.')}</p>
         </article>
+
+        ${videoEmbed ? `<article class="advanced-profile-card advanced-profile-video-card">
+          <p class="eyebrow">Meet the provider</p>
+          <h2>A personal introduction.</h2>
+          <div class="advanced-video-wrap"><iframe src="${esc(videoEmbed)}" title="Video introduction from ${esc(fullName)}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+        </article>` : ''}
 
         <article class="advanced-profile-card">
           <p class="eyebrow">Areas of support</p>
@@ -120,7 +149,7 @@ function renderProfile(p) {
         <article class="advanced-profile-card advanced-profile-media-preview">
           <p class="eyebrow">Advanced profile space</p>
           <h3>Room for a richer introduction.</h3>
-          <p>Photos, video, additional office locations, and direct scheduling can appear here as those Advanced features are connected.</p>
+          <p>Additional office photos and locations can appear here as those Advanced features are connected.</p>
         </article>
       </aside>
     </section>
