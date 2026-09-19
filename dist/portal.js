@@ -15,6 +15,25 @@ function say(text, kind = '') {
   const node = document.getElementById('profileMessage');
   if (node) { node.textContent = text; node.dataset.kind = kind; }
 }
+function applyPublicationStatus(status = 'draft') {
+  const normalized = status || 'draft';
+  document.getElementById('publicationStatus').textContent = `● ${titleCase(normalized)}`;
+  const submit = document.getElementById('submitProfile');
+  if (!submit) return;
+  if (normalized === 'published') {
+    submit.disabled = true;
+    submit.textContent = 'Already published';
+    submit.title = 'Published providers can update their live profile with Save changes.';
+  } else if (normalized === 'suspended') {
+    submit.disabled = true;
+    submit.textContent = 'Publication suspended';
+    submit.title = 'Contact the directory administrator before republishing.';
+  } else {
+    submit.disabled = false;
+    submit.textContent = normalized === 'submitted' ? 'Submitted for review' : 'Submit for review';
+    submit.title = '';
+  }
+}
 function showPanel(name) {
   buttons.forEach(b => b.classList.toggle('active', b.dataset.panel === name));
   panels.forEach(p => p.classList.toggle('active', p.id === `panel-${name}`));
@@ -140,7 +159,12 @@ async function saveProfile() {
     : await supabase.from('provider_profiles').insert(payload).select().single();
   if (result.error) { say(result.error.message, 'error'); return false; }
   populateProfile(result.data);
-  say('Profile saved.', 'success');
+  const publication = profile?.id
+    ? await supabase.from('provider_publication').select('status').eq('provider_id', profile.id).maybeSingle()
+    : null;
+  const status = publication?.data?.status || 'draft';
+  applyPublicationStatus(status);
+  say(status === 'published' ? 'Changes saved and updated on your live profile.' : 'Profile saved.', 'success');
   return true;
 }
 async function loadProfile() {
@@ -151,7 +175,7 @@ async function loadProfile() {
     const publication = await supabase.from('provider_publication').select('status, plan').eq('provider_id', data.id).maybeSingle();
     if (publication.data) {
       currentPlan = publication.data.plan || currentPlan;
-      document.getElementById('publicationStatus').textContent = `● ${titleCase(publication.data.status || 'draft')}`;
+      applyPublicationStatus(publication.data.status || 'draft');
     }
   }
   applyPlan(currentPlan);
@@ -161,7 +185,7 @@ async function submitProfile() {
   say('Submitting your profile for review…');
   const { error } = await supabase.rpc('submit_provider_profile');
   if (error) { say(error.message, 'error'); return; }
-  document.getElementById('publicationStatus').textContent = '● Submitted';
+  applyPublicationStatus('submitted');
   say('Profile submitted for review.', 'success');
 }
 buttons.forEach(b => b.addEventListener('click', () => showPanel(b.dataset.panel)));
