@@ -6,4 +6,7 @@ let mode='signin';
 function say(text,kind=''){message.textContent=text;message.dataset.kind=kind;}
 document.querySelectorAll('.auth-tab').forEach(tab=>tab.addEventListener('click',()=>{mode=tab.dataset.mode;document.querySelectorAll('.auth-tab').forEach(x=>x.classList.toggle('active',x===tab));submit.textContent=mode==='signin'?'Sign in':'Create account';password.autocomplete=mode==='signin'?'current-password':'new-password';say('');}));
 form.addEventListener('submit',async event=>{event.preventDefault();submit.disabled=true;say(mode==='signin'?'Signing you in…':'Creating your account…');const result=mode==='signin'?await supabase.auth.signInWithPassword({email:email.value.trim(),password:password.value}):await supabase.auth.signUp({email:email.value.trim(),password:password.value,emailRedirectTo:`${location.origin}/provider-login.html`});submit.disabled=false;if(result.error){say(result.error.message,'error');return;}if(mode==='signup'&&!result.data.session){say('Check your email to confirm your account, then return here to sign in.','success');return;}say('Signed in. Opening your provider portal…','success');location.href='dashboard.html';});
-const {data:{session}}=await supabase.auth.getSession();if(session){say('You are already signed in. Opening your provider portal…','success');setTimeout(()=>location.href='dashboard.html',500);}
+const signedOut = new URLSearchParams(location.search).get('signed_out') === '1';
+const {data:{session}}=await supabase.auth.getSession();
+if (signedOut) { if (session) await supabase.auth.signOut(); say('You have been signed out.','success'); }
+else if(session){say('You are already signed in. Opening your provider portal…','success');setTimeout(()=>location.href='dashboard.html',500);}
