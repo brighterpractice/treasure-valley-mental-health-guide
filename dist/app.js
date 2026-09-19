@@ -188,11 +188,14 @@ async function loadProviders() {
   els.results.innerHTML = '<div class="no-results"><h3>Loading provider profiles…</h3></div>';
 
   const note = document.querySelector('.preview-note');
+  const demoMode = new URLSearchParams(location.search).get('demo') === '1';
 
   if (!supabase) {
     directoryMode = 'error';
-    providers = [...demoProviders];
-    if (note) note.textContent = 'Demo profiles are shown while the live provider directory is temporarily unavailable.';
+    providers = demoMode ? [...demoProviders] : [];
+    if (note) note.textContent = demoMode
+      ? 'Demo mode is active. These profiles are fictional test data.'
+      : 'The provider directory is temporarily unavailable. Please try again shortly.';
     render();
     return;
   }
@@ -205,19 +208,23 @@ async function loadProviders() {
   if (error) {
     console.error('Unable to load published provider profiles:', error);
     directoryMode = 'error';
-    providers = [...demoProviders];
-    if (note) note.textContent = 'Demo profiles are shown while the live provider directory is temporarily unavailable.';
+    providers = demoMode ? [...demoProviders] : [];
+    if (note) note.textContent = demoMode
+      ? 'Demo mode is active because the live directory could not be loaded.'
+      : 'The provider directory is temporarily unavailable. Please try again shortly.';
     render();
     return;
   }
 
   const publishedProviders = (data || []).map(mapDirectoryProfile);
-  providers = [...demoProviders, ...publishedProviders];
+  providers = demoMode ? [...demoProviders, ...publishedProviders] : publishedProviders;
   directoryMode = 'live';
   if (note) {
-    note.textContent = publishedProviders.length
-      ? 'Published provider profiles appear alongside clearly labeled demo profiles during development.'
-      : 'Demo profiles are shown while no provider profiles are published yet.';
+    note.textContent = demoMode
+      ? 'Demo mode is active. Fictional test profiles are clearly labeled.'
+      : publishedProviders.length
+        ? 'Published provider profiles.'
+        : 'No provider profiles are published yet.';
   }
   render();
 }
