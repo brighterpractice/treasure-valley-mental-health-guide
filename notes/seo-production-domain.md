@@ -24,7 +24,6 @@ The current product notes reference `TVMentalHealthGuide.org`. Confirm that this
 - /directory-standards.html
 - /privacy.html
 - /providers.html
-- /referral.html
 - /ptsd.html
 - /trauma.html
 - /emdr.html
@@ -42,3 +41,5 @@ The current product notes reference `TVMentalHealthGuide.org`. Confirm that this
 - /crisis-help.html
 
 Provider profile URLs should be added only after permanent, crawlable provider slugs are implemented. Do not add provider-login, dashboard, or admin pages to the sitemap.
+
+Referral campaign pages should remain noindex unless a separate organic-search use case is intentionally created.
