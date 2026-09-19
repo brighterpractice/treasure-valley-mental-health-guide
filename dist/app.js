@@ -566,6 +566,11 @@ els.applyAddress.addEventListener('click', async () => {
   }
 });
 els.address.addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); els.applyAddress.click(); } });
+const initialQuery = new URLSearchParams(location.search).get('q') || '';
+if (initialQuery) {
+  els.search.value = initialQuery;
+  state.search = initialQuery.trim();
+}
 els.search.addEventListener('input', () => { state.search = els.search.value.trim(); render(); });
 
 document.querySelectorAll('.filter-chip').forEach(chip => chip.addEventListener('click', () => {
