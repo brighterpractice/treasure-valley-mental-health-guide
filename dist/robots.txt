@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /provider-login
+
+# Add the XML sitemap after the permanent production domain is connected.
