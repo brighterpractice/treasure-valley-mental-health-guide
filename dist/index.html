@@ -86,10 +86,12 @@
             <label class="field-label" for="searchText">What would you like support with?</label>
             <div class="search-input-wrap"><span>⌕</span><input id="searchText" class="input" type="search" placeholder="Trauma, anxiety, EMDR…" /></div>
 
-            <div class="filter-group location-tools">
-              <label><span class="field-label">Your area <small>for distance sorting</small></span>
-                <select id="originFilter" class="input"><option value="">Not specified</option><option>Meridian</option><option>Boise</option><option>Eagle</option><option>Nampa</option><option>Kuna</option><option>Star</option><option>Caldwell</option></select>
-              </label>
+            <div class="filter-group distance-search">
+              <span class="field-label">Starting address <small>home, work, or another place</small></span>
+              <div class="distance-address-row"><input id="addressFilter" class="input" type="search" autocomplete="street-address" placeholder="Enter an address"><button id="applyAddressFilter" class="button secondary small-btn" type="button">Use address</button></div>
+              <div class="distance-radius-row"><label><span class="field-label">Within</span><select id="radiusFilter" class="input"><option value="1">1 mile</option><option value="2">2 miles</option><option value="5" selected>5 miles</option><option value="10">10 miles</option><option value="25">25 miles</option><option value="50">50 miles</option></select></label><p id="addressStatus" class="distance-status" role="status" aria-live="polite">Your exact address stays in this browser and is not shown to providers.</p></div>
+            </div>
+            <div class="filter-group">
               <label><span class="field-label">Counselor location</span>
                 <select id="cityFilter" class="input"><option value="">Anywhere in the Treasure Valley</option><option>Meridian</option><option>Boise</option><option>Eagle</option><option>Nampa</option><option>Kuna</option><option>Star</option><option>Caldwell</option></select>
               </label>
@@ -123,7 +125,7 @@
               </div>
             </details>
 
-            <div class="privacy-note"><b>Privacy-minded search.</b> Distance can later use ZIP code rather than a street address, and individual sensitive searches will not be exposed to providers.</div>
+            <div class="privacy-note"><b>Privacy-minded search.</b> Address-based distance is calculated for this search only. Your exact address and individual sensitive searches are not exposed to providers.</div>
           </aside>
 
           <div class="results-area">
