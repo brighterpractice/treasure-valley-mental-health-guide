@@ -173,6 +173,9 @@ function mapDirectoryProfile(row) {
     years: Number.isFinite(row.years_in_practice) ? row.years_in_practice : null,
     bio: row.short_bio || '',
     website: row.website_url || '',
+    officeAddress: row.office_address || '',
+    latitude: Number.isFinite(row.office_latitude) ? row.office_latitude : null,
+    longitude: Number.isFinite(row.office_longitude) ? row.office_longitude : null,
     verifiedLabel: formatVerifiedDate(row.last_verified_at),
     plan: row.plan || 'basic',
     isDemo: false
@@ -221,7 +224,7 @@ async function loadProviders() {
 
 const state = {
   specialties: new Set(),
-  origin: '', city: '', population: '', gender: '', visit: '', availability: '', insurance: '', approach: '', search: '', sort: 'az'
+  originCoords: null, radius: 5, city: '', population: '', gender: '', visit: '', availability: '', insurance: '', approach: '', search: '', sort: 'az'
 };
 
 
@@ -244,9 +247,7 @@ function compareAlphabetical(a, b) {
   return lastName(a.provider.name).localeCompare(lastName(b.provider.name)) || a.provider.name.localeCompare(b.provider.name);
 }
 
-function milesBetweenCities(fromCity, toCity) {
-  const a = cityCoordinates[fromCity];
-  const b = cityCoordinates[toCity];
+function milesBetweenCoords(a, b) {
   if (!a || !b) return null;
   const rad = d => d * Math.PI / 180;
   const R = 3958.8;
@@ -256,6 +257,48 @@ function milesBetweenCities(fromCity, toCity) {
   const lat2 = rad(b[0]);
   const h = Math.sin(dLat/2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon/2) ** 2;
   return 2 * R * Math.asin(Math.sqrt(h));
+}
+function providerCoords(provider) {
+  if (Number.isFinite(provider.latitude) && Number.isFinite(provider.longitude)) return [provider.latitude, provider.longitude];
+  if (provider.isDemo && cityCoordinates[provider.city]) return cityCoordinates[provider.city];
+  return null;
+}
+async function geocodeVisitorAddress(value) {
+  const address = String(value || '').trim();
+  if (!address) return null;
+  const params = new URLSearchParams({ q: address, format:'jsonv2', limit:'1', countrycodes:'us' });
+  const response = await fetch(`https://nominatim.openstreetmap.org/search?${params.toString()}`, { headers:{ Accept:'application/json' } });
+  if (!response.ok) throw new Error('Address lookup failed');
+  const rows = await response.json();
+  if (!rows?.length) return null;
+  return [Number(rows[0].lat), Number(rows[0].lon)];
+}
+function visitorKey() {
+  const keyName = 'tvmh_anonymous_visitor';
+  let value = localStorage.getItem(keyName);
+  if (!value) {
+    value = crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    localStorage.setItem(keyName, value);
+  }
+  return value;
+}
+async function recordProviderEvent(provider, eventKind) {
+  if (!supabase || !provider || provider.isDemo) return;
+  try {
+    await supabase.rpc('record_provider_event', {
+      target_provider_id: provider.id,
+      event_kind: eventKind,
+      anonymous_visitor_key: visitorKey(),
+      specialty_values: [...state.specialties],
+      approach_values: state.approach ? [state.approach] : [],
+      city_value: state.city || '',
+      visit_value: state.visit || '',
+      insurance_value: state.insurance || '',
+      source_value: 'directory_search'
+    });
+  } catch (error) {
+    console.error('Analytics event could not be recorded', error);
+  }
 }
 
 const synonyms = {
@@ -272,7 +315,10 @@ const els = {
   count: document.getElementById('resultsCount'),
   summary: document.getElementById('matchSummary'),
   search: document.getElementById('searchText'),
-  origin: document.getElementById('originFilter'),
+  address: document.getElementById('addressFilter'),
+  radius: document.getElementById('radiusFilter'),
+  applyAddress: document.getElementById('applyAddressFilter'),
+  addressStatus: document.getElementById('addressStatus'),
   city: document.getElementById('cityFilter'),
   population: document.getElementById('populationFilter'),
   gender: document.getElementById('genderFilter'),
@@ -358,6 +404,10 @@ function calculateMatch(provider) {
 
 function providerPassesHardFilters(provider) {
   // Gender is treated as a preference rather than a hard exclusion in scoring.
+  if (state.originCoords) {
+    const distance = milesBetweenCoords(state.originCoords, providerCoords(provider));
+    if (distance === null || distance > state.radius) return false;
+  }
   if (state.city && provider.city !== state.city) return false;
   if (state.population && !provider.populations.includes(state.population)) return false;
   if (state.visit && !provider.visits.includes(state.visit)) return false;
@@ -377,7 +427,7 @@ function matchLabel(relevance, hasFilters) {
 }
 
 function render() {
-  const hasFilters = Boolean(state.search || state.city || state.population || state.gender || state.visit || state.availability || state.insurance || state.approach || state.specialties.size);
+  const hasFilters = Boolean(state.search || state.originCoords || state.city || state.population || state.gender || state.visit || state.availability || state.insurance || state.approach || state.specialties.size);
   let rows = providers
     .filter(providerPassesHardFilters)
     .map(provider => ({ provider, match: calculateMatch(provider) }));
@@ -392,10 +442,10 @@ function render() {
 
   if (state.sort === 'az') rows.sort(compareAlphabetical);
   if (state.sort === 'distance') {
-    if (state.origin) {
+    if (state.originCoords) {
       rows.sort((a,b) => {
-        const da = milesBetweenCities(state.origin, a.provider.city) ?? Number.POSITIVE_INFINITY;
-        const db = milesBetweenCities(state.origin, b.provider.city) ?? Number.POSITIVE_INFINITY;
+        const da = milesBetweenCoords(state.originCoords, providerCoords(a.provider)) ?? Number.POSITIVE_INFINITY;
+        const db = milesBetweenCoords(state.originCoords, providerCoords(b.provider)) ?? Number.POSITIVE_INFINITY;
         return da - db || compareAlphabetical(a,b);
       });
     } else {
@@ -424,8 +474,8 @@ function render() {
     const tags = hasFilters && match.matched.length
       ? match.matched.slice(0, 5).map(t => `<span class="match-tag matched">✓ ${escapeHtml(t)}</span>`).join('')
       : provider.specialties.slice(0, 3).map(t => `<span class="match-tag">${escapeHtml(t)}</span>`).join('');
-    const distance = state.origin ? milesBetweenCities(state.origin, provider.city) : null;
-    const distanceLine = distance !== null ? `<span class="distance-pill">≈ ${distance < 1 ? '&lt;1' : distance.toFixed(1)} mi from ${escapeHtml(state.origin)}</span>` : '';
+    const distance = state.originCoords ? milesBetweenCoords(state.originCoords, providerCoords(provider)) : null;
+    const distanceLine = distance !== null ? `<span class="distance-pill">${distance < 0.1 ? '&lt;0.1' : distance.toFixed(1)} mi away</span>` : '';
     return `
       <article class="provider-card">
         <div class="provider-avatar">${initials(provider.name)}</div>
@@ -448,6 +498,7 @@ function render() {
 function openProfile(id) {
   const p = providers.find(x => x.id === id);
   if (!p) return;
+  recordProviderEvent(p, 'profile_view');
   els.profileDialogContent.innerHTML = `
     <div class="dialog-hero">
       <div class="provider-avatar">${initials(p.name)}</div>
@@ -467,9 +518,10 @@ function openProfile(id) {
       <div><span>Verification</span><strong>${escapeHtml(p.verifiedLabel)}</strong></div>
     </div>
     <div class="profile-dialog-actions">
-      ${p.website ? `<a class="button secondary" href="${escapeHtml(p.website)}" target="_blank" rel="noopener noreferrer">Visit provider website ↗</a>` : ''}
+      ${p.website ? `<a class="button secondary" data-provider-website="${escapeHtml(p.id)}" href="${escapeHtml(p.website)}" target="_blank" rel="noopener noreferrer">Visit provider website ↗</a>` : ''}
       ${p.plan === 'advanced' ? `<a class="button primary" href="provider-profile.html?id=${encodeURIComponent(p.id)}">View full profile →</a>` : ''}
     </div>`;
+  els.profileDialog.querySelector('[data-provider-website]')?.addEventListener('click', () => recordProviderEvent(p, 'website_click'));
   els.profileDialog.showModal();
 }
 
@@ -480,7 +532,40 @@ function escapeHtml(value) {
 function bindSelect(el, key) {
   el.addEventListener('change', () => { state[key] = el.value; render(); });
 }
-bindSelect(els.origin, 'origin'); bindSelect(els.city, 'city'); bindSelect(els.population, 'population'); bindSelect(els.gender, 'gender'); bindSelect(els.visit, 'visit'); bindSelect(els.availability, 'availability'); bindSelect(els.insurance, 'insurance'); bindSelect(els.approach, 'approach'); bindSelect(els.sort, 'sort');
+bindSelect(els.city, 'city'); bindSelect(els.population, 'population'); bindSelect(els.gender, 'gender'); bindSelect(els.visit, 'visit'); bindSelect(els.availability, 'availability'); bindSelect(els.insurance, 'insurance'); bindSelect(els.approach, 'approach'); bindSelect(els.sort, 'sort');
+els.radius.addEventListener('change', () => { state.radius = Number(els.radius.value) || 5; if (state.originCoords) render(); });
+els.applyAddress.addEventListener('click', async () => {
+  const value = els.address.value.trim();
+  if (!value) {
+    state.originCoords = null;
+    els.addressStatus.textContent = 'Enter a home, work, or other starting address.';
+    render();
+    return;
+  }
+  els.applyAddress.disabled = true;
+  els.addressStatus.textContent = 'Locating address…';
+  try {
+    const coords = await geocodeVisitorAddress(value);
+    if (!coords) {
+      state.originCoords = null;
+      els.addressStatus.textContent = 'We could not locate that address. Try including city, state, and ZIP.';
+      return;
+    }
+    state.originCoords = coords;
+    state.radius = Number(els.radius.value) || 5;
+    state.sort = 'distance';
+    els.sort.value = 'distance';
+    els.addressStatus.textContent = `Showing providers within ${state.radius} mile${state.radius === 1 ? '' : 's'}. Your exact address is not shared with providers.`;
+    render();
+  } catch (error) {
+    console.error(error);
+    state.originCoords = null;
+    els.addressStatus.textContent = 'Address lookup is temporarily unavailable.';
+  } finally {
+    els.applyAddress.disabled = false;
+  }
+});
+els.address.addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); els.applyAddress.click(); } });
 els.search.addEventListener('input', () => { state.search = els.search.value.trim(); render(); });
 
 document.querySelectorAll('.filter-chip').forEach(chip => chip.addEventListener('click', () => {
@@ -492,9 +577,13 @@ document.querySelectorAll('.filter-chip').forEach(chip => chip.addEventListener(
 
 document.getElementById('clearFilters').addEventListener('click', () => {
   state.specialties.clear();
-  ['origin','city','population','gender','visit','availability','insurance','approach','search'].forEach(k => state[k] = '');
+  ['city','population','gender','visit','availability','insurance','approach','search'].forEach(k => state[k] = '');
+  state.originCoords = null;
+  state.radius = 5;
   state.sort = 'az';
-  [els.origin, els.city, els.population, els.gender, els.visit, els.availability, els.insurance, els.approach, els.search].forEach(el => el.value = '');
+  [els.address, els.city, els.population, els.gender, els.visit, els.availability, els.insurance, els.approach, els.search].forEach(el => el.value = '');
+  els.radius.value = '5';
+  els.addressStatus.textContent = 'Your exact address stays in this browser and is not shown to providers.';
   els.sort.value = 'az';
   document.querySelectorAll('.filter-chip').forEach(chip => chip.classList.remove('active'));
   render();
