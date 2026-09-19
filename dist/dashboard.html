@@ -78,7 +78,14 @@
       <div class="portal-card">
         <div class="card-heading"><div><span class="eyebrow">Advanced feature</span><h3>QR code generator</h3><p id="qrMessage" class="auth-message" role="status" aria-live="polite"></p></div><span class="badge">Advanced</span></div>
         <p>Create separate QR codes for your practice website and your client or scheduling portal. Download either one for printed materials, or choose to display it directly on your Advanced public profile.</p>
-        <label class="video-field">Client / scheduling portal URL<input id="clientPortalUrl" class="input" type="url" placeholder="https://portal.example.com"><small>This can be a client portal, online scheduling page, or another secure destination you want clients to reach.</small></label>
+        <div class="qr-destination-assigner">
+          <label class="video-field">QR destination URL<input id="qrDestinationInput" class="input" type="url" placeholder="https://example.com"><small>Enter a URL, then choose which QR code it should update.</small></label>
+          <input id="clientPortalUrl" type="hidden">
+          <div class="qr-assign-actions">
+            <button class="button secondary" type="button" id="assignWebsiteQr">Set as Practice Website</button>
+            <button class="button secondary" type="button" id="assignPortalQr">Set as Client / Scheduling Portal</button>
+          </div>
+        </div>
         <div class="qr-option-grid">
           <article class="qr-option-card">
             <div><span class="eyebrow">Practice website</span><h4>Website QR</h4><p id="websiteQrUrl" class="qr-url">Add your practice website in My Profile.</p></div>
