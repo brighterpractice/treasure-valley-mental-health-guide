@@ -68,7 +68,7 @@ function showPanel(name) {
   panels.forEach(p => p.classList.toggle('active', p.id === `panel-${name}`));
   const btn = buttons.find(b => b.dataset.panel === name);
   title.textContent = btn ? btn.childNodes[0].textContent.trim() : titleCase(name);
-  if (name === 'qr') renderQrCode();
+  if (name === 'qr') renderQrCodes();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 function setValues(values) {
@@ -141,6 +141,10 @@ function populateProfile(row) {
     videoUrl: row?.video_url || '',
     clientPortalUrl: row?.client_portal_url || ''
   });
+  const showWebsiteQr = document.getElementById('showWebsiteQr');
+  const showPortalQr = document.getElementById('showPortalQr');
+  if (showWebsiteQr) showWebsiteQr.checked = Boolean(row?.show_website_qr);
+  if (showPortalQr) showPortalQr.checked = Boolean(row?.show_portal_qr);
   setChips('specialties', row?.specialties || []);
   setChips('approaches', row?.approaches || []);
   setChips('populations', row?.populations || []);
@@ -178,6 +182,8 @@ function formPayload() {
     license_number: document.getElementById('licenseNumber').value.trim(),
     video_url: normalizeYouTubeUrl(document.getElementById('videoUrl')?.value || ''),
     client_portal_url: normalizeWebsiteUrl(document.getElementById('clientPortalUrl')?.value || ''),
+    show_website_qr: Boolean(document.getElementById('showWebsiteQr')?.checked),
+    show_portal_qr: Boolean(document.getElementById('showPortalQr')?.checked),
     populations: [...getChips('populations'), ...getCustomTags('customPopulations')],
     insurance: [...getChips('insurance'), ...getCustomTags('customInsurance')],
     specialties: [...getChips('specialties'), ...getCustomTags('customSpecialties')],
@@ -234,54 +240,53 @@ async function saveAdvanced(panelMessageId, successText) {
   if (ok) sayPanel(panelMessageId, successText, 'success');
   return ok;
 }
-function qrDestination() {
-  const target = document.getElementById('qrTarget')?.value || 'website';
-  const raw = target === 'portal'
+function qrUrl(kind) {
+  const raw = kind === 'portal'
     ? (document.getElementById('clientPortalUrl')?.value || '')
     : (document.getElementById('websiteUrl')?.value || '');
   return normalizeWebsiteUrl(raw);
 }
-async function renderQrCode() {
-  const canvas = document.getElementById('qrCanvas');
-  const targetValue = document.getElementById('qrTargetValue');
-  const caption = document.getElementById('qrCaption');
-  if (!canvas || !targetValue) return;
-  const url = qrDestination();
+async function renderQr(kind) {
+  const isPortal = kind === 'portal';
+  const canvas = document.getElementById(isPortal ? 'portalQrCanvas' : 'websiteQrCanvas');
+  const urlNode = document.getElementById(isPortal ? 'portalQrUrl' : 'websiteQrUrl');
+  if (!canvas || !urlNode) return;
+  const url = qrUrl(kind);
   if (!url) {
     const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    targetValue.textContent = 'Add a URL for the selected destination.';
-    if (caption) caption.textContent = 'QR preview';
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    urlNode.textContent = isPortal ? 'Add a client or scheduling portal URL.' : 'Add your practice website in My Profile.';
     return;
   }
-  targetValue.textContent = url;
-  if (caption) caption.textContent = document.getElementById('qrTarget')?.value === 'portal' ? 'Client portal QR' : 'Website QR';
+  urlNode.textContent = url;
+  await QRCode.toCanvas(canvas, url, { width: 240, margin: 2, errorCorrectionLevel: 'M' });
+}
+async function renderQrCodes() {
   try {
-    await QRCode.toCanvas(canvas, url, { width: 280, margin: 2, errorCorrectionLevel: 'M' });
-    sayPanel('qrMessage', 'QR code ready.', 'success');
+    await Promise.all([renderQr('website'), renderQr('portal')]);
   } catch (error) {
     console.error(error);
-    sayPanel('qrMessage', 'Unable to generate the QR code.', 'error');
+    sayPanel('qrMessage', 'Unable to generate one or more QR codes.', 'error');
   }
 }
-async function copyQrDestination() {
-  const url = qrDestination();
-  if (!url) { sayPanel('qrMessage', 'Add a URL for the selected destination first.', 'error'); return; }
+async function copyQr(kind) {
+  const url = qrUrl(kind);
+  if (!url) { sayPanel('qrMessage', 'Add the destination URL first.', 'error'); return; }
   try {
     await navigator.clipboard.writeText(url);
-    sayPanel('qrMessage', 'Destination copied.', 'success');
+    sayPanel('qrMessage', kind === 'portal' ? 'Portal link copied.' : 'Website link copied.', 'success');
   } catch {
     sayPanel('qrMessage', 'Could not copy the destination automatically.', 'error');
   }
 }
-async function downloadQr() {
-  const canvas = document.getElementById('qrCanvas');
-  const url = qrDestination();
-  if (!canvas || !url) { sayPanel('qrMessage', 'Generate a QR code first.', 'error'); return; }
-  await renderQrCode();
+async function downloadQr(kind) {
+  const isPortal = kind === 'portal';
+  const canvas = document.getElementById(isPortal ? 'portalQrCanvas' : 'websiteQrCanvas');
+  const url = qrUrl(kind);
+  if (!canvas || !url) { sayPanel('qrMessage', 'Add the destination URL first.', 'error'); return; }
+  await renderQr(kind);
   const link = document.createElement('a');
-  const kind = document.getElementById('qrTarget')?.value === 'portal' ? 'client-portal' : 'website';
-  link.download = `treasure-valley-${kind}-qr.png`;
+  link.download = isPortal ? 'treasure-valley-client-portal-qr.png' : 'treasure-valley-website-qr.png';
   link.href = canvas.toDataURL('image/png');
   link.click();
 }
@@ -308,13 +313,15 @@ document.getElementById('addApproach')?.addEventListener('click', () => addCusto
 document.getElementById('customApproachInput')?.addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); addCustomTag('customApproachInput', 'customApproaches'); } });
 document.getElementById('saveProfile')?.addEventListener('click', saveProfile);
 document.getElementById('saveMedia')?.addEventListener('click', () => saveAdvanced('mediaMessage', 'Video saved.'));
-document.getElementById('saveQrLinks')?.addEventListener('click', async () => {
-  if (await saveAdvanced('qrMessage', 'Client portal link saved.')) renderQrCode();
+document.getElementById('saveQrSettings')?.addEventListener('click', async () => {
+  if (await saveAdvanced('qrMessage', 'QR settings saved.')) renderQrCodes();
 });
-document.getElementById('generateQr')?.addEventListener('click', renderQrCode);
-document.getElementById('qrTarget')?.addEventListener('change', renderQrCode);
-document.getElementById('copyQrLink')?.addEventListener('click', copyQrDestination);
-document.getElementById('downloadQr')?.addEventListener('click', downloadQr);
+document.getElementById('clientPortalUrl')?.addEventListener('input', () => renderQr('portal'));
+document.getElementById('websiteUrl')?.addEventListener('input', () => renderQr('website'));
+document.getElementById('copyWebsiteQr')?.addEventListener('click', () => copyQr('website'));
+document.getElementById('copyPortalQr')?.addEventListener('click', () => copyQr('portal'));
+document.getElementById('downloadWebsiteQr')?.addEventListener('click', () => downloadQr('website'));
+document.getElementById('downloadPortalQr')?.addEventListener('click', () => downloadQr('portal'));
 document.getElementById('submitProfile')?.addEventListener('click', submitProfile);
 document.getElementById('signOut')?.addEventListener('click', async () => { const { error } = await supabase.auth.signOut(); if (error) { say(error.message, 'error'); return; } location.replace('provider-login.html?signed_out=1'); });
 document.getElementById('previewBtn')?.addEventListener('click', () => location.href = 'index.html#find');
