@@ -471,6 +471,24 @@ async function loadAnalytics() {
   document.getElementById('metricWebsiteRate').textContent = views ? `${(website/views*100).toFixed(1)}% of profile views` : '0% of profile views';
   document.getElementById('metricPortalRate').textContent = views ? `${(portalClicks/views*100).toFixed(1)}% of profile views` : '0% of profile views';
   document.getElementById('metricProfileViewsNote').textContent = `${start} through ${end}`;
+  const overviewViews = document.getElementById('overviewViews');
+  const overviewVisitors = document.getElementById('overviewVisitors');
+  const overviewClicks = document.getElementById('overviewClicks');
+  if (overviewViews) overviewViews.textContent = views;
+  if (overviewVisitors) overviewVisitors.textContent = unique;
+  if (overviewClicks) overviewClicks.textContent = website + portalClicks;
+  const specialtyTop = data?.top_specialties?.[0]?.label || '';
+  const approachTop = data?.top_approaches?.[0]?.label || '';
+  const insightHeadline = document.getElementById('advancedInsightHeadline');
+  if (insightHeadline) {
+    insightHeadline.textContent = specialtyTop && approachTop
+      ? `People are finding this profile for ${specialtyTop} and ${approachTop}.`
+      : specialtyTop
+        ? `People are finding this profile for ${specialtyTop}.`
+        : views
+          ? 'Your Advanced profile is receiving visitor activity.'
+          : 'No profile activity has been recorded in this date range yet.';
+  }
   renderBars('analyticsSpecialties', data?.top_specialties || []);
   renderBars('analyticsApproaches', data?.top_approaches || []);
   renderSources('analyticsSources', data?.sources || []);
@@ -492,7 +510,10 @@ function applyPlan(plan) {
       b.setAttribute('aria-disabled', String(!advanced));
     }
   });
-  if (advanced) setDefaultAnalyticsRange();
+  if (advanced) {
+    setDefaultAnalyticsRange();
+    loadAnalytics();
+  }
 }
 document.getElementById('applyAnalyticsRange')?.addEventListener('click', loadAnalytics);
 document.querySelectorAll('.plan-switch').forEach(b => b.addEventListener('click', () => applyPlan(b.dataset.plan)));
