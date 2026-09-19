@@ -64,11 +64,16 @@ function applyPublicationStatus(status = 'draft') {
   }
 }
 function showPanel(name) {
+  if (['analytics','media','qr'].includes(name) && currentPlan !== 'advanced') {
+    showPanel('billing');
+    return;
+  }
   buttons.forEach(b => b.classList.toggle('active', b.dataset.panel === name));
   panels.forEach(p => p.classList.toggle('active', p.id === `panel-${name}`));
   const btn = buttons.find(b => b.dataset.panel === name);
   title.textContent = btn ? btn.childNodes[0].textContent.trim() : titleCase(name);
   if (name === 'qr') renderQrCodes();
+  if (name === 'analytics') loadAnalytics();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 function setValues(values) {
@@ -122,6 +127,23 @@ function addCustomTag(inputId, listId) {
   input.value = '';
   input.focus();
 }
+async function geocodeAddress(value) {
+  const address = String(value || '').trim();
+  if (!address) return null;
+  const params = new URLSearchParams({
+    q: address,
+    format: 'jsonv2',
+    limit: '1',
+    countrycodes: 'us'
+  });
+  const response = await fetch(`https://nominatim.openstreetmap.org/search?${params.toString()}`, {
+    headers: { 'Accept': 'application/json' }
+  });
+  if (!response.ok) throw new Error('Address lookup failed');
+  const rows = await response.json();
+  if (!rows?.length) return null;
+  return { lat: Number(rows[0].lat), lng: Number(rows[0].lon) };
+}
 function normalizeWebsiteUrl(value) {
   const trimmed = value.trim();
   if (!trimmed) return '';
@@ -147,7 +169,8 @@ function populateProfile(row) {
     licenseState: row?.license_state || '',
     licenseNumber: row?.license_number || '',
     videoUrl: row?.video_url || '',
-    clientPortalUrl: row?.client_portal_url || ''
+    clientPortalUrl: row?.client_portal_url || '',
+    officeAddress: row?.office_address || ''
   });
   const showWebsiteQr = document.getElementById('showWebsiteQr');
   const showPortalQr = document.getElementById('showPortalQr');
@@ -171,7 +194,10 @@ function populateProfile(row) {
   const name = `${first} ${last}`.trim() || session.user.email;
   document.getElementById('accountName').textContent = name;
   document.getElementById('accountPractice').textContent = row?.practice_name || 'Complete your profile';
-  document.getElementById('accountAvatar').textContent = `${first[0] || ''}${last[0] || ''}`.toUpperCase() || 'TV';
+  const providerInitials = `${first[0] || ''}${last[0] || ''}`.toUpperCase() || 'TV';
+  document.getElementById('accountAvatar').textContent = providerInitials;
+  const mediaAvatar = document.getElementById('mediaAvatar');
+  if (mediaAvatar) mediaAvatar.textContent = providerInitials;
 }
 function formPayload() {
   return {
@@ -183,6 +209,7 @@ function formPayload() {
     years_in_practice: document.getElementById('yearsInPractice').value ? Number(document.getElementById('yearsInPractice').value) : null,
     short_bio: document.getElementById('shortBio').value.trim(),
     website_url: normalizeWebsiteUrl(document.getElementById('websiteUrl').value),
+    office_address: document.getElementById('officeAddress')?.value.trim() || '',
     availability: document.getElementById('availability').value,
     visit_types: [document.getElementById('visitType').value],
     provider_gender: document.getElementById('providerGender').value,
@@ -208,6 +235,29 @@ async function saveProfile() {
     return false;
   }
   const payload = formPayload();
+  if (payload.office_address) {
+    if (payload.office_address !== (profile?.office_address || '') || !profile?.office_latitude || !profile?.office_longitude) {
+      try {
+        const geo = await geocodeAddress(payload.office_address);
+        if (!geo) {
+          say('We could not locate that office address. Check the address and try again.', 'error');
+          return false;
+        }
+        payload.office_latitude = geo.lat;
+        payload.office_longitude = geo.lng;
+      } catch (error) {
+        console.error(error);
+        say('Office address lookup is temporarily unavailable. Try again shortly.', 'error');
+        return false;
+      }
+    } else {
+      payload.office_latitude = profile.office_latitude;
+      payload.office_longitude = profile.office_longitude;
+    }
+  } else {
+    payload.office_latitude = null;
+    payload.office_longitude = null;
+  }
   if (!payload.first_name || !payload.last_name || !payload.credentials || !payload.primary_city || !payload.short_bio) {
     say('Add your name, credentials, city, and bio before saving.', 'error');
     return false;
@@ -366,6 +416,67 @@ document.getElementById('submitProfile')?.addEventListener('click', submitProfil
 document.getElementById('signOut')?.addEventListener('click', async () => { const { error } = await supabase.auth.signOut(); if (error) { say(error.message, 'error'); return; } location.replace('provider-login.html?signed_out=1'); });
 document.getElementById('previewBtn')?.addEventListener('click', () => location.href = 'index.html#find');
 
+function isoDateLocal(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth()+1).padStart(2,'0');
+  const d = String(date.getDate()).padStart(2,'0');
+  return `${y}-${m}-${d}`;
+}
+function setDefaultAnalyticsRange() {
+  const end = new Date();
+  const start = new Date();
+  start.setDate(end.getDate() - 29);
+  const startEl = document.getElementById('analyticsStart');
+  const endEl = document.getElementById('analyticsEnd');
+  if (startEl && !startEl.value) startEl.value = isoDateLocal(start);
+  if (endEl && !endEl.value) endEl.value = isoDateLocal(end);
+}
+function renderBars(id, rows = []) {
+  const node = document.getElementById(id);
+  if (!node) return;
+  if (!rows.length) { node.innerHTML = '<div class="analytics-empty">No data in this range yet.</div>'; return; }
+  const max = Math.max(...rows.map(r => Number(r.count) || 0),1);
+  node.innerHTML = rows.map(r => `<div><span>${String(r.label || '')}</span><i style="--w:${Math.round((Number(r.count)||0)/max*100)}%"></i><b>${Number(r.count)||0}</b></div>`).join('');
+}
+function renderSources(id, rows = []) {
+  const node = document.getElementById(id);
+  if (!node) return;
+  if (!rows.length) { node.innerHTML = '<div class="analytics-empty">No data in this range yet.</div>'; return; }
+  node.innerHTML = rows.map(r => `<div><span>${String(r.label || '')}</span><b>${Number(r.count)||0}</b></div>`).join('');
+}
+async function loadAnalytics() {
+  if (currentPlan !== 'advanced') return;
+  setDefaultAnalyticsRange();
+  const start = document.getElementById('analyticsStart')?.value;
+  const end = document.getElementById('analyticsEnd')?.value;
+  if (!start || !end || end < start) {
+    sayPanel('analyticsMessage','Choose a valid start and end date.','error');
+    return;
+  }
+  sayPanel('analyticsMessage','Loading analytics…');
+  const { data, error } = await supabase.rpc('provider_analytics_summary', { start_date:start, end_date:end });
+  if (error) {
+    console.error(error);
+    sayPanel('analyticsMessage', error.message || 'Unable to load analytics.', 'error');
+    return;
+  }
+  const views = Number(data?.profile_views || 0);
+  const unique = Number(data?.unique_visitors || 0);
+  const website = Number(data?.website_clicks || 0);
+  const portalClicks = Number(data?.portal_clicks || 0);
+  document.getElementById('metricProfileViews').textContent = views;
+  document.getElementById('metricUniqueVisitors').textContent = unique;
+  document.getElementById('metricWebsiteClicks').textContent = website;
+  document.getElementById('metricPortalClicks').textContent = portalClicks;
+  document.getElementById('metricWebsiteRate').textContent = views ? `${(website/views*100).toFixed(1)}% of profile views` : '0% of profile views';
+  document.getElementById('metricPortalRate').textContent = views ? `${(portalClicks/views*100).toFixed(1)}% of profile views` : '0% of profile views';
+  document.getElementById('metricProfileViewsNote').textContent = `${start} through ${end}`;
+  renderBars('analyticsSpecialties', data?.top_specialties || []);
+  renderBars('analyticsApproaches', data?.top_approaches || []);
+  renderSources('analyticsSources', data?.sources || []);
+  renderSources('analyticsAccess', data?.access_preferences || []);
+  sayPanel('analyticsMessage', views ? 'Analytics updated for the selected range.' : 'No tracked activity in this date range yet.', views ? 'success' : '');
+}
 function applyPlan(plan) {
   currentPlan = plan;
   const advanced = plan === 'advanced';
@@ -373,10 +484,17 @@ function applyPlan(plan) {
   document.getElementById('billingPlanName').textContent = advanced ? 'Advanced · $49/year' : 'Basic · $12/year';
   document.getElementById('checkoutItem').textContent = advanced ? 'Advanced Provider Listing — $49/year' : 'Basic Provider Listing — $12/year';
   document.querySelectorAll('.plan-switch').forEach(b => b.classList.toggle('selected', b.dataset.plan === plan));
+  const insight = document.getElementById('advancedInsight');
+  if (insight) insight.hidden = !advanced;
   document.querySelectorAll('.portal-nav button').forEach(b => {
-    if (['analytics', 'media', 'qr'].includes(b.dataset.panel)) b.classList.toggle('locked', !advanced);
+    if (['analytics', 'media', 'qr'].includes(b.dataset.panel)) {
+      b.classList.toggle('locked', !advanced);
+      b.setAttribute('aria-disabled', String(!advanced));
+    }
   });
+  if (advanced) setDefaultAnalyticsRange();
 }
+document.getElementById('applyAnalyticsRange')?.addEventListener('click', loadAnalytics);
 document.querySelectorAll('.plan-switch').forEach(b => b.addEventListener('click', () => applyPlan(b.dataset.plan)));
 document.getElementById('checkoutDemo')?.addEventListener('click', () => document.getElementById('checkoutDialog').showModal());
 document.getElementById('closeCheckout')?.addEventListener('click', () => document.getElementById('checkoutDialog').close());
