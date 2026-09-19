@@ -160,6 +160,8 @@ function mapDirectoryProfile(row) {
     practice: row.practice_name || 'Independent practice',
     city: row.primary_city || '',
     gender: row.provider_gender || '',
+    licenseState: row.license_state || '',
+    licenseNumber: row.license_number || '',
     specialties: Array.isArray(row.specialties) ? row.specialties : [],
     approaches: Array.isArray(row.approaches) ? row.approaches : [],
     services: Array.isArray(row.services) ? row.services : [],
@@ -459,6 +461,7 @@ function openProfile(id) {
       <div><span>Payment</span><strong>${p.insurance.length ? p.insurance.map(escapeHtml).join(', ') : 'Not specified'}</strong></div>
       <div><span>Availability</span><strong>${escapeHtml(p.availability)}</strong></div>
       <div><span>Provider gender</span><strong>${p.gender ? escapeHtml(p.gender) : 'Not specified'}</strong></div>
+      ${p.licenseNumber ? `<div><span>State license</span><strong>${escapeHtml(p.licenseState || 'State license')} · ${escapeHtml(p.licenseNumber)}</strong></div>` : ''}
       <div><span>Verification</span><strong>${escapeHtml(p.verifiedLabel)}</strong></div>
     </div>
     ${p.website ? `<p><a class="button secondary" href="${escapeHtml(p.website)}" target="_blank" rel="noopener noreferrer">Visit provider website ↗</a></p>` : ''}`;
