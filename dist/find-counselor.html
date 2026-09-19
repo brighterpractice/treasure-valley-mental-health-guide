@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Find a Counselor in the Treasure Valley | Mental Health Guide</title>
+  <meta name="description" content="Search Treasure Valley counselors by location, distance, specialty, insurance, treatment approach, availability, visit type, and more.">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="align-theme.css">
+  <link rel="stylesheet" href="warm-theme.css">
+</head>
+<body class="warm-site">
+  <header class="align-header">
+    <div class="shell align-nav-shell">
+      <a class="align-brand" href="index.html" aria-label="Treasure Valley Mental Health Guide home">
+        <span class="align-brand-mark" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M8 35 20 15l8 12 5-8 7 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 38h30" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></span>
+        <span class="align-brand-copy"><strong>Treasure Valley</strong><small>Mental Health Guide</small></span>
+      </a>
+      <button class="menu-button align-menu-button" id="menuButton" aria-expanded="false" aria-controls="primaryNav">Menu</button>
+      <nav class="align-primary-nav" id="primaryNav" aria-label="Primary navigation">
+        <a href="resources.html">Resources</a>
+        <a href="find-counselor.html" aria-current="page">Find a counselor</a>
+        <a href="index.html#about">About the guide</a>
+        <a href="providers.html">For providers</a>
+        <a class="align-nav-cta" href="find-counselor.html">Find your support</a>
+      </nav>
+    </div>
+  </header>
+  <main>
+    <section class="resource-mini-hero">
+      <div class="shell resource-mini-hero-grid">
+        <div><p class="eyebrow">Counselor directory</p><h1>Find support that fits your life.</h1><p>Search by what matters to you, including distance from home or work, specialty, insurance, modality, availability, and telehealth.</p></div>
+        <aside class="resource-note"><strong>Privacy-minded search</strong><p>Your starting address is used only to calculate distance in your browser search. It is not shown to providers.</p></aside>
+      </div>
+    </section>
+    <section class="align-directory-section" id="find">
+      <div class="shell">
+        <div class="align-directory-heading">
+          <div><p class="eyebrow">Counselor directory</p><h2>Find someone you can connect with.</h2></div>
+          <p>Start with what matters to you. Narrow your options by location, insurance, approach, and availability.</p>
+        </div>
+
+        <div class="directory-layout align-directory-layout">
+          <aside class="filters-card align-filters-card">
+            <div class="filter-topline">
+              <div><span class="filter-kicker">Refine your search</span><h3>What matters most?</h3></div>
+              <button class="text-button" id="clearFilters">Clear</button>
+            </div>
+
+            <label class="field-label" for="searchText">What would you like support with?</label>
+            <div class="search-input-wrap"><span>⌕</span><input id="searchText" class="input" type="search" placeholder="Trauma, anxiety, EMDR…" /></div>
+
+            <div class="filter-group distance-search">
+              <span class="field-label">Starting address <small>home, work, or another place</small></span>
+              <div class="distance-address-row"><input id="addressFilter" class="input" type="search" autocomplete="street-address" placeholder="Enter an address"><button id="applyAddressFilter" class="button secondary small-btn" type="button">Use address</button></div>
+              <div class="distance-radius-row"><label><span class="field-label">Within</span><select id="radiusFilter" class="input"><option value="1">1 mile</option><option value="2">2 miles</option><option value="5" selected>5 miles</option><option value="10">10 miles</option><option value="25">25 miles</option><option value="50">50 miles</option></select></label><p id="addressStatus" class="distance-status" role="status" aria-live="polite">Your exact address stays in this browser and is not shown to providers.</p></div>
+            </div>
+            <div class="filter-group">
+              <label><span class="field-label">Counselor location</span>
+                <select id="cityFilter" class="input"><option value="">Anywhere in the Treasure Valley</option><option>Meridian</option><option>Boise</option><option>Eagle</option><option>Nampa</option><option>Kuna</option><option>Star</option><option>Caldwell</option></select>
+              </label>
+            </div>
+
+            <div class="filter-group">
+              <span class="field-label">Areas of support</span>
+              <div class="chip-options" id="specialtyFilters">
+                <button type="button" class="filter-chip" data-value="Anxiety">Anxiety</button>
+                <button type="button" class="filter-chip" data-value="Trauma">Trauma</button>
+                <button type="button" class="filter-chip" data-value="Grief">Grief</button>
+                <button type="button" class="filter-chip" data-value="Life Transitions">Life transitions</button>
+                <button type="button" class="filter-chip" data-value="Relationships">Relationships</button>
+                <button type="button" class="filter-chip" data-value="OCD">OCD</button>
+              </div>
+            </div>
+
+            <details class="more-filters">
+              <summary>More preferences</summary>
+              <div class="filter-group two-col">
+                <label><span class="field-label">Works with</span><select id="populationFilter" class="input"><option value="">Any</option><option>Adults</option><option>Teens</option><option>Children</option><option>Couples</option><option>Families</option></select></label>
+                <label><span class="field-label">Provider gender</span><select id="genderFilter" class="input"><option value="">No preference</option><option>Female</option><option>Male</option><option>Nonbinary</option></select></label>
+              </div>
+              <div class="filter-group two-col">
+                <label><span class="field-label">Visit type</span><select id="visitFilter" class="input"><option value="">Any</option><option>In-person</option><option>Telehealth</option></select></label>
+                <label><span class="field-label">Availability</span><select id="availabilityFilter" class="input"><option value="">Any</option><option>Accepting new clients</option><option>Waitlist</option></select></label>
+              </div>
+              <div class="filter-group two-col">
+                <label><span class="field-label">Insurance / payment</span><select id="insuranceFilter" class="input"><option value="">Any</option><option>Blue Cross of Idaho</option><option>Regence</option><option>PacificSource</option><option>Aetna</option><option>Self-pay</option></select></label>
+                <label><span class="field-label">Therapy approach</span><select id="approachFilter" class="input"><option value="">Any</option><option>EMDR</option><option>CBT</option><option>ACT</option><option>DBT-informed</option><option>Person-centered</option></select></label>
+              </div>
+            </details>
+
+            <div class="privacy-note"><b>Privacy-minded search.</b> Address-based distance is calculated for this search only. Your exact address and individual sensitive searches are not exposed to providers.</div>
+          </aside>
+
+          <div class="results-area">
+            <p class="preview-note">Loading published provider profiles…</p><div class="results-toolbar align-results-toolbar">
+              <div><strong id="resultsCount">0 providers</strong><span id="matchSummary"> in this guide</span></div>
+              <label class="sort-label"><span>Sort by</span><select id="sortSelect" class="compact-select"><option value="az">Last name A–Z</option><option value="distance">Distance — nearest first</option><option value="relevance">Best match to filters</option><option value="availability">Accepting new clients first</option><option value="experience">Years in practice</option></select></label>
+            </div>
+            <div id="results" class="results-list" aria-live="polite"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+  </main>
+  <footer class="align-footer">
+    <div class="shell align-footer-grid">
+      <div><a class="align-brand footer-brand" href="index.html"><span class="align-brand-mark"><svg viewBox="0 0 48 48"><path d="M8 35 20 15l8 12 5-8 7 16" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M9 38h30" fill="none" stroke="currentColor" stroke-width="2.4"/></svg></span><span class="align-brand-copy"><strong>Treasure Valley</strong><small>Mental Health Guide</small></span></a></div>
+      <div><span class="footer-label">Guide</span><a href="resources.html">Resources</a><a href="find-counselor.html">Find a counselor</a><a href="index.html#about">About</a></div>
+      <div><span class="footer-label">Providers</span><a href="providers.html">For providers</a><a href="provider-login.html">Provider portal</a></div>
+      <div><span class="footer-label">Need urgent help?</span><a href="crisis-help.html">Crisis & immediate help</a><small>This directory is not an emergency service.</small></div>
+    </div>
+  </footer>
+  <dialog id="profileDialog" class="profile-dialog"><button class="dialog-close" id="closeDialog" aria-label="Close profile">×</button><div id="profileDialogContent"></div></dialog>
+  <div id="providerDialog" hidden></div>
+  <script src="supabase-config.js"></script><script type="module" src="app.js"></script>
+</body>
+</html>
