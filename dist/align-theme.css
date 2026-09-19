@@ -414,3 +414,13 @@
 .warm-site .button.primary:hover{
   background:#0d2946;
 }
+
+
+/* Address + radius directory search */
+.distance-search{display:grid;gap:.7rem}
+.distance-address-row{display:grid;grid-template-columns:1fr auto;gap:.55rem;align-items:center}
+.distance-address-row .button{min-height:44px;white-space:nowrap}
+.distance-radius-row{display:grid;grid-template-columns:110px 1fr;gap:.75rem;align-items:end}
+.distance-radius-row label{display:grid}
+.distance-status{margin:0!important;color:var(--align-muted);font-size:.68rem;line-height:1.45}
+@media(max-width:560px){.distance-address-row{grid-template-columns:1fr}.distance-address-row .button{width:100%}.distance-radius-row{grid-template-columns:1fr}}
