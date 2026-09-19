@@ -11,6 +11,7 @@ let directoryMode = 'loading';
 const demoProviders = [
   {
     id: 'demo-bright-hope',
+    plan: 'advanced',
     name: 'Lisa Bright',
     credentials: 'LCPC',
     practice: 'Bright Hope Therapy',
@@ -173,6 +174,7 @@ function mapDirectoryProfile(row) {
     bio: row.short_bio || '',
     website: row.website_url || '',
     verifiedLabel: formatVerifiedDate(row.last_verified_at),
+    plan: row.plan || 'basic',
     isDemo: false
   };
 }
@@ -464,7 +466,10 @@ function openProfile(id) {
       ${p.licenseNumber ? `<div><span>State license</span><strong>${escapeHtml(p.licenseState || 'State license')} · ${escapeHtml(p.licenseNumber)}</strong></div>` : ''}
       <div><span>Verification</span><strong>${escapeHtml(p.verifiedLabel)}</strong></div>
     </div>
-    ${p.website ? `<p><a class="button secondary" href="${escapeHtml(p.website)}" target="_blank" rel="noopener noreferrer">Visit provider website ↗</a></p>` : ''}`;
+    <div class="profile-dialog-actions">
+      ${p.website ? `<a class="button secondary" href="${escapeHtml(p.website)}" target="_blank" rel="noopener noreferrer">Visit provider website ↗</a>` : ''}
+      ${p.plan === 'advanced' ? `<a class="button primary" href="provider-profile.html?id=${encodeURIComponent(p.id)}">View full profile →</a>` : ''}
+    </div>`;
   els.profileDialog.showModal();
 }
 
