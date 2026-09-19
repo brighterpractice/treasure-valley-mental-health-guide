@@ -12,3 +12,9 @@
 
 /provider-login*
   X-Robots-Tag: noindex, nofollow
+
+/provider-profile*
+  X-Robots-Tag: noindex, follow
+
+/referral*
+  X-Robots-Tag: noindex, follow
