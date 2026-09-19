@@ -1,38 +1,140 @@
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
+
+const cfg = window.TV_GUIDE_SUPABASE;
+const supabase = createClient(cfg.url, cfg.publishableKey);
 const buttons = [...document.querySelectorAll('.portal-nav button')];
 const panels = [...document.querySelectorAll('.portal-panel')];
 const title = document.getElementById('panelTitle');
 const qs = new URLSearchParams(location.search);
 let currentPlan = qs.get('plan') === 'basic' ? 'basic' : 'advanced';
+let session;
+let profile = null;
 
-function titleCase(v){ return v.charAt(0).toUpperCase()+v.slice(1); }
-function showPanel(name){
-  buttons.forEach(b=>b.classList.toggle('active', b.dataset.panel===name));
-  panels.forEach(p=>p.classList.toggle('active', p.id===`panel-${name}`));
-  const btn = buttons.find(b=>b.dataset.panel===name);
-  title.textContent = btn ? btn.childNodes[0].textContent.trim() : titleCase(name);
-  window.scrollTo({top:0, behavior:'smooth'});
+function titleCase(v) { return v.charAt(0).toUpperCase() + v.slice(1); }
+function say(text, kind = '') {
+  const node = document.getElementById('profileMessage');
+  if (node) { node.textContent = text; node.dataset.kind = kind; }
 }
-buttons.forEach(b=>b.addEventListener('click',()=>showPanel(b.dataset.panel)));
-document.querySelectorAll('[data-jump]').forEach(b=>b.addEventListener('click',()=>showPanel(b.dataset.jump)));
+function showPanel(name) {
+  buttons.forEach(b => b.classList.toggle('active', b.dataset.panel === name));
+  panels.forEach(p => p.classList.toggle('active', p.id === `panel-${name}`));
+  const btn = buttons.find(b => b.dataset.panel === name);
+  title.textContent = btn ? btn.childNodes[0].textContent.trim() : titleCase(name);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function setValues(values) {
+  for (const [id, value] of Object.entries(values)) {
+    const node = document.getElementById(id);
+    if (node) node.value = value ?? '';
+  }
+}
+function setChips(field, values = []) {
+  document.querySelectorAll(`.profile-chips[data-field="${field}"] .filter-chip`).forEach(chip => {
+    chip.classList.toggle('active', values.includes(chip.dataset.value));
+  });
+}
+function getChips(field) {
+  return [...document.querySelectorAll(`.profile-chips[data-field="${field}"] .filter-chip.active`)].map(chip => chip.dataset.value);
+}
+function populateProfile(row) {
+  profile = row;
+  setValues({
+    firstName: row?.first_name,
+    lastName: row?.last_name,
+    credentials: row?.credentials,
+    practiceName: row?.practice_name,
+    primaryCity: row?.primary_city,
+    yearsInPractice: row?.years_in_practice,
+    shortBio: row?.short_bio,
+    websiteUrl: row?.website_url,
+    availability: row?.availability || 'Not specified',
+    visitType: (row?.visit_types || [])[0] || 'In-person & telehealth'
+  });
+  setChips('specialties', row?.specialties || []);
+  setChips('approaches', row?.approaches || []);
+  const first = row?.first_name || '';
+  const last = row?.last_name || '';
+  const name = `${first} ${last}`.trim() || session.user.email;
+  document.getElementById('accountName').textContent = name;
+  document.getElementById('accountPractice').textContent = row?.practice_name || 'Complete your profile';
+  document.getElementById('accountAvatar').textContent = `${first[0] || ''}${last[0] || ''}`.toUpperCase() || 'TV';
+}
+function formPayload() {
+  return {
+    first_name: document.getElementById('firstName').value.trim(),
+    last_name: document.getElementById('lastName').value.trim(),
+    credentials: document.getElementById('credentials').value.trim(),
+    practice_name: document.getElementById('practiceName').value.trim(),
+    primary_city: document.getElementById('primaryCity').value,
+    years_in_practice: document.getElementById('yearsInPractice').value ? Number(document.getElementById('yearsInPractice').value) : null,
+    short_bio: document.getElementById('shortBio').value.trim(),
+    website_url: document.getElementById('websiteUrl').value.trim(),
+    availability: document.getElementById('availability').value,
+    visit_types: [document.getElementById('visitType').value],
+    specialties: getChips('specialties'),
+    approaches: getChips('approaches')
+  };
+}
+async function saveProfile() {
+  say('Saving your profile…');
+  const payload = formPayload();
+  if (!payload.first_name || !payload.last_name || !payload.credentials || !payload.primary_city || !payload.short_bio) {
+    say('Add your name, credentials, city, and bio before saving.', 'error');
+    return false;
+  }
+  const result = profile?.id
+    ? await supabase.from('provider_profiles').update(payload).eq('id', profile.id).select().single()
+    : await supabase.from('provider_profiles').insert(payload).select().single();
+  if (result.error) { say(result.error.message, 'error'); return false; }
+  populateProfile(result.data);
+  say('Profile saved.', 'success');
+  return true;
+}
+async function loadProfile() {
+  const { data, error } = await supabase.from('provider_profiles').select('*').maybeSingle();
+  if (error) { say(error.message, 'error'); return; }
+  populateProfile(data);
+  if (data) {
+    const publication = await supabase.from('provider_publication').select('status, plan').eq('provider_id', data.id).maybeSingle();
+    if (publication.data) {
+      currentPlan = publication.data.plan || currentPlan;
+      document.getElementById('publicationStatus').textContent = `● ${titleCase(publication.data.status || 'draft')}`;
+    }
+  }
+  applyPlan(currentPlan);
+}
+async function submitProfile() {
+  if (!await saveProfile()) return;
+  say('Submitting your profile for review…');
+  const { error } = await supabase.rpc('submit_provider_profile');
+  if (error) { say(error.message, 'error'); return; }
+  document.getElementById('publicationStatus').textContent = '● Submitted';
+  say('Profile submitted for review.', 'success');
+}
+buttons.forEach(b => b.addEventListener('click', () => showPanel(b.dataset.panel)));
+document.querySelectorAll('[data-jump]').forEach(b => b.addEventListener('click', () => showPanel(b.dataset.jump)));
+document.querySelectorAll('.profile-chips .filter-chip').forEach(b => b.addEventListener('click', () => b.classList.toggle('active')));
+document.getElementById('saveProfile')?.addEventListener('click', saveProfile);
+document.getElementById('submitProfile')?.addEventListener('click', submitProfile);
+document.getElementById('signOut')?.addEventListener('click', async () => { await supabase.auth.signOut(); location.href = 'provider-login.html'; });
+document.getElementById('previewBtn')?.addEventListener('click', () => location.href = 'index.html#find');
 
-document.querySelectorAll('.static-chips .filter-chip').forEach(b=>b.addEventListener('click',()=>b.classList.toggle('active')));
-
-document.getElementById('saveProfile')?.addEventListener('click',e=>{ const old=e.currentTarget.textContent; e.currentTarget.textContent='Saved ✓'; setTimeout(()=>e.currentTarget.textContent=old,1400); });
-
-function applyPlan(plan){
-  currentPlan=plan;
-  const advanced=plan==='advanced';
+function applyPlan(plan) {
+  currentPlan = plan;
+  const advanced = plan === 'advanced';
   document.getElementById('planMetric').textContent = advanced ? 'Advanced' : 'Basic';
   document.getElementById('billingPlanName').textContent = advanced ? 'Advanced · $49/year' : 'Basic · $12/year';
   document.getElementById('checkoutItem').textContent = advanced ? 'Advanced Provider Listing — $49/year' : 'Basic Provider Listing — $12/year';
-  document.querySelectorAll('.plan-switch').forEach(b=>b.classList.toggle('selected',b.dataset.plan===plan));
-  document.querySelectorAll('.portal-nav button').forEach(b=>{
-    if(['analytics','media','qr'].includes(b.dataset.panel)) b.classList.toggle('locked',!advanced);
+  document.querySelectorAll('.plan-switch').forEach(b => b.classList.toggle('selected', b.dataset.plan === plan));
+  document.querySelectorAll('.portal-nav button').forEach(b => {
+    if (['analytics', 'media', 'qr'].includes(b.dataset.panel)) b.classList.toggle('locked', !advanced);
   });
 }
-applyPlan(currentPlan);
-document.querySelectorAll('.plan-switch').forEach(b=>b.addEventListener('click',()=>applyPlan(b.dataset.plan)));
+document.querySelectorAll('.plan-switch').forEach(b => b.addEventListener('click', () => applyPlan(b.dataset.plan)));
+document.getElementById('checkoutDemo')?.addEventListener('click', () => document.getElementById('checkoutDialog').showModal());
+document.getElementById('closeCheckout')?.addEventListener('click', () => document.getElementById('checkoutDialog').close());
 
-document.getElementById('checkoutDemo')?.addEventListener('click',()=>document.getElementById('checkoutDialog').showModal());
-document.getElementById('closeCheckout')?.addEventListener('click',()=>document.getElementById('checkoutDialog').close());
-document.getElementById('previewBtn')?.addEventListener('click',()=>location.href='index.html#find');
+const { data: auth } = await supabase.auth.getSession();
+session = auth.session;
+if (!session) location.href = 'provider-login.html';
+else await loadProfile();
