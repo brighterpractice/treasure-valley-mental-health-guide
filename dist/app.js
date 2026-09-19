@@ -1,108 +1,93 @@
-const providers = [
-  {
-    id: 'bright-hope',
-    name: 'Lisa Bright',
-    credentials: 'LCPC',
-    practice: 'Bright Hope Therapy',
-    city: 'Meridian',
-    gender: 'Female',
-    specialties: ['Anxiety', 'Trauma', 'Life Transitions'],
-    approaches: ['EMDR', 'Person-centered'],
-    populations: ['Adults'],
-    insurance: ['Self-pay', 'Blue Cross of Idaho'],
-    visits: ['In-person', 'Telehealth'],
-    availability: 'Accepting new clients',
-    years: 8,
-    bio: 'Individual counseling for adults with an emphasis on trauma, anxiety, life transitions, and holistic wellness. EMDR trained.',
-    verified: 'Prototype data',
-    realExample: true
-  },
-  {
-    id: 'riverbend',
-    name: 'Morgan Reed',
-    credentials: 'LCSW',
-    practice: 'Riverbend Counseling',
-    city: 'Boise',
-    gender: 'Female',
-    specialties: ['Anxiety', 'Grief', 'Relationships'],
-    approaches: ['CBT', 'ACT'],
-    populations: ['Adults', 'Couples'],
-    insurance: ['Regence', 'Aetna', 'Self-pay'],
-    visits: ['In-person', 'Telehealth'],
-    availability: 'Accepting new clients',
-    years: 12,
-    bio: 'Prototype provider focused on anxiety, grief, relationship stress, and adult life changes.',
-    verified: 'Prototype data'
-  },
-  {
-    id: 'foothills',
-    name: 'Daniel Cho',
-    credentials: 'LMFT',
-    practice: 'Foothills Family Counseling',
-    city: 'Eagle',
-    gender: 'Male',
-    specialties: ['Relationships', 'Life Transitions'],
-    approaches: ['CBT', 'Person-centered'],
-    populations: ['Adults', 'Couples', 'Families'],
-    insurance: ['Blue Cross of Idaho', 'PacificSource', 'Self-pay'],
-    visits: ['In-person'],
-    availability: 'Waitlist',
-    years: 16,
-    bio: 'Prototype provider serving adults, couples, and families around relationship concerns and major life transitions.',
-    verified: 'Prototype data'
-  },
-  {
-    id: 'sagebrush',
-    name: 'Elena Torres',
-    credentials: 'LPC',
-    practice: 'Sagebrush Counseling Collective',
-    city: 'Nampa',
-    gender: 'Female',
-    specialties: ['Trauma', 'Anxiety', 'OCD'],
-    approaches: ['EMDR', 'CBT'],
-    populations: ['Adults', 'Teens'],
-    insurance: ['PacificSource', 'Self-pay'],
-    visits: ['In-person', 'Telehealth'],
-    availability: 'Accepting new clients',
-    years: 6,
-    bio: 'Prototype provider working with trauma, anxiety, and OCD concerns in adults and teens.',
-    verified: 'Prototype data'
-  },
-  {
-    id: 'westbench',
-    name: 'Avery Johnson',
-    credentials: 'LCSW',
-    practice: 'West Bench Counseling',
-    city: 'Boise',
-    gender: 'Nonbinary',
-    specialties: ['Anxiety', 'Life Transitions', 'Grief'],
-    approaches: ['ACT', 'DBT-informed'],
-    populations: ['Adults', 'Teens'],
-    insurance: ['Aetna', 'Regence', 'Self-pay'],
-    visits: ['Telehealth'],
-    availability: 'Accepting new clients',
-    years: 9,
-    bio: 'Prototype provider offering telehealth support for anxiety, grief, and life transitions.',
-    verified: 'Prototype data'
-  },
-  {
-    id: 'canyon-path',
-    name: 'Rachel Nguyen',
-    credentials: 'LCPC',
-    practice: 'Canyon Path Therapy',
-    city: 'Caldwell',
-    gender: 'Female',
-    specialties: ['Trauma', 'Grief'],
-    approaches: ['EMDR', 'DBT-informed'],
-    populations: ['Adults'],
-    insurance: ['Blue Cross of Idaho', 'Self-pay'],
-    visits: ['In-person', 'Telehealth'],
-    availability: 'Waitlist',
-    years: 11,
-    bio: 'Prototype provider focused on adult trauma recovery, grief, and coping skills.',
-    verified: 'Prototype data'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
+
+const cfg = window.TV_GUIDE_SUPABASE;
+const supabase = cfg?.url && cfg?.publishableKey
+  ? createClient(cfg.url, cfg.publishableKey)
+  : null;
+
+let providers = [];
+let directoryMode = 'loading';
+
+function normalizeVisitTypes(values = []) {
+  const normalized = new Set();
+  for (const value of values || []) {
+    if (value === 'In-person & telehealth') {
+      normalized.add('In-person');
+      normalized.add('Telehealth');
+    } else if (value) {
+      normalized.add(value);
+    }
   }
-];
+  return [...normalized];
+}
+
+function formatVerifiedDate(value) {
+  if (!value) return 'Published profile';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'Published profile';
+  return `Verified ${date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}`;
+}
+
+function mapDirectoryProfile(row) {
+  return {
+    id: String(row.id),
+    name: `${row.first_name || ''} ${row.last_name || ''}`.trim(),
+    credentials: row.credentials || '',
+    practice: row.practice_name || 'Independent practice',
+    city: row.primary_city || '',
+    gender: row.provider_gender || '',
+    specialties: Array.isArray(row.specialties) ? row.specialties : [],
+    approaches: Array.isArray(row.approaches) ? row.approaches : [],
+    services: Array.isArray(row.services) ? row.services : [],
+    populations: Array.isArray(row.populations) ? row.populations : [],
+    insurance: Array.isArray(row.insurance) ? row.insurance : [],
+    visits: normalizeVisitTypes(row.visit_types),
+    availability: row.availability || 'Not specified',
+    years: Number.isFinite(row.years_in_practice) ? row.years_in_practice : null,
+    bio: row.short_bio || '',
+    website: row.website_url || '',
+    verifiedLabel: formatVerifiedDate(row.last_verified_at)
+  };
+}
+
+async function loadProviders() {
+  els.count.textContent = 'Loading…';
+  els.summary.textContent = '';
+  els.results.innerHTML = '<div class="no-results"><h3>Loading provider profiles…</h3></div>';
+
+  const note = document.querySelector('.preview-note');
+
+  if (!supabase) {
+    directoryMode = 'error';
+    providers = [];
+    if (note) note.textContent = 'The provider directory is temporarily unavailable.';
+    render();
+    return;
+  }
+
+  const { data, error } = await supabase.rpc('list_directory_profiles', {
+    page_size: 200,
+    page_offset: 0
+  });
+
+  if (error) {
+    console.error('Unable to load published provider profiles:', error);
+    directoryMode = 'error';
+    providers = [];
+    if (note) note.textContent = 'The provider directory is temporarily unavailable.';
+    render();
+    return;
+  }
+
+  providers = (data || []).map(mapDirectoryProfile);
+  directoryMode = 'live';
+  if (note) {
+    note.textContent = providers.length
+      ? 'Published provider profiles are reviewed before appearing in the guide.'
+      : 'No provider profiles are published yet.';
+  }
+  render();
+}
 
 const state = {
   specialties: new Set(),
@@ -196,7 +181,7 @@ function calculateMatch(provider) {
 
   if (desiredClinical.size || rawTerms.length) {
     possible += 35;
-    const providerText = `${provider.name} ${provider.practice} ${provider.city} ${provider.specialties.join(' ')} ${provider.approaches.join(' ')} ${provider.bio}`.toLowerCase();
+    const providerText = `${provider.name} ${provider.practice} ${provider.city} ${provider.specialties.join(' ')} ${provider.approaches.join(' ')} ${provider.services.join(' ')} ${provider.bio}`.toLowerCase();
     const clinicalHits = [...desiredClinical].filter(t => provider.specialties.includes(t) || provider.approaches.includes(t));
     const rawHits = rawTerms.filter(t => providerText.includes(t));
     const requestedCount = Math.max(1, desiredClinical.size + rawTerms.length);
@@ -269,7 +254,7 @@ function render() {
 
   if (state.search) {
     rows = rows.filter(({ provider, match }) => {
-      const text = `${provider.name} ${provider.practice} ${provider.city} ${provider.specialties.join(' ')} ${provider.approaches.join(' ')} ${provider.bio}`.toLowerCase();
+      const text = `${provider.name} ${provider.practice} ${provider.city} ${provider.specialties.join(' ')} ${provider.approaches.join(' ')} ${provider.services.join(' ')} ${provider.bio}`.toLowerCase();
       const terms = normalizedSearchTerms(state.search);
       return match.matched.length > 0 || terms.some(term => text.includes(String(term).toLowerCase()));
     });
@@ -292,10 +277,16 @@ function render() {
   if (state.sort === 'availability') rows.sort((a,b) => Number(b.provider.availability === 'Accepting new clients') - Number(a.provider.availability === 'Accepting new clients') || compareAlphabetical(a,b));
 
   els.count.textContent = `${rows.length} provider${rows.length === 1 ? '' : 's'}`;
-  els.summary.textContent = hasFilters ? ' matching your selections' : ' in this prototype';
+  els.summary.textContent = hasFilters ? ' matching your selections' : ' in this guide';
 
   if (!rows.length) {
-    els.results.innerHTML = `<div class="no-results"><h3>No prototype profiles match every selected filter.</h3><p>Try removing one or two filters. In production we can also offer a “show near matches” option instead of returning an empty list.</p></div>`;
+    if (directoryMode === 'error') {
+      els.results.innerHTML = '<div class="no-results"><h3>The provider directory could not be loaded.</h3><p>Please refresh the page and try again.</p></div>';
+    } else if (!providers.length) {
+      els.results.innerHTML = '<div class="no-results"><h3>No provider profiles are published yet.</h3><p>Approved providers will appear here automatically.</p></div>';
+    } else {
+      els.results.innerHTML = '<div class="no-results"><h3>No provider profiles match every selected filter.</h3><p>Try removing one or two filters to broaden your search.</p></div>';
+    }
     return;
   }
 
@@ -310,13 +301,13 @@ function render() {
         <div class="provider-avatar">${initials(provider.name)}</div>
         <div>
           <h3>${escapeHtml(provider.name)}, ${escapeHtml(provider.credentials)}</h3>
-          <div class="provider-meta">${escapeHtml(provider.practice)} · ${escapeHtml(provider.city)} · ${provider.years} years in practice</div>
+          <div class="provider-meta">${escapeHtml(provider.practice)} · ${escapeHtml(provider.city)}${provider.years !== null ? ` · ${provider.years} year${provider.years === 1 ? '' : 's'} in practice` : ''}</div>
           <div class="match-tags">${distanceLine}${tags}</div>
         </div>
         <div class="provider-side">
           <div class="match-strength">${matchLabel(match.relevance, hasFilters)}</div>
           <button class="card-link" data-profile="${provider.id}">View profile</button>
-          <div class="verified">${provider.verified === 'Prototype data' ? 'Demo profile' : `Verified ${provider.verified}`}</div>
+          <div class="verified">${escapeHtml(provider.verifiedLabel)}</div>
         </div>
       </article>`;
   }).join('');
@@ -330,18 +321,20 @@ function openProfile(id) {
   els.profileDialogContent.innerHTML = `
     <div class="dialog-hero">
       <div class="provider-avatar">${initials(p.name)}</div>
-      <div><div class="eyebrow">${p.realExample ? 'Prototype example' : 'Fictional demo profile'}</div><h2>${escapeHtml(p.name)}, ${escapeHtml(p.credentials)}</h2><p>${escapeHtml(p.practice)} · ${escapeHtml(p.city)}</p></div>
+      <div><div class="eyebrow">Published provider profile</div><h2>${escapeHtml(p.name)}${p.credentials ? `, ${escapeHtml(p.credentials)}` : ''}</h2><p>${escapeHtml(p.practice)} · ${escapeHtml(p.city)}</p></div>
     </div>
     <p>${escapeHtml(p.bio)}</p>
     <div class="profile-detail-grid">
-      <div><span>Specialties</span><strong>${p.specialties.join(', ')}</strong></div>
-      <div><span>Approaches</span><strong>${p.approaches.join(', ')}</strong></div>
-      <div><span>Works with</span><strong>${p.populations.join(', ')}</strong></div>
-      <div><span>Visits</span><strong>${p.visits.join(', ')}</strong></div>
-      <div><span>Payment</span><strong>${p.insurance.join(', ')}</strong></div>
-      <div><span>Availability</span><strong>${p.availability}</strong></div>
+      <div><span>Specialties</span><strong>${p.specialties.length ? p.specialties.map(escapeHtml).join(', ') : 'Not specified'}</strong></div>
+      <div><span>Approaches</span><strong>${p.approaches.length ? p.approaches.map(escapeHtml).join(', ') : 'Not specified'}</strong></div>
+      <div><span>Services</span><strong>${p.services.length ? p.services.map(escapeHtml).join(', ') : 'Not specified'}</strong></div>
+      <div><span>Works with</span><strong>${p.populations.length ? p.populations.map(escapeHtml).join(', ') : 'Not specified'}</strong></div>
+      <div><span>Visits</span><strong>${p.visits.length ? p.visits.map(escapeHtml).join(', ') : 'Not specified'}</strong></div>
+      <div><span>Payment</span><strong>${p.insurance.length ? p.insurance.map(escapeHtml).join(', ') : 'Not specified'}</strong></div>
+      <div><span>Availability</span><strong>${escapeHtml(p.availability)}</strong></div>
+      <div><span>Verification</span><strong>${escapeHtml(p.verifiedLabel)}</strong></div>
     </div>
-    <p class="dialog-note">Production profiles will include a verified website/contact button, optional photo/logo, languages, office location, self-pay range, and a clear “last verified” date. This demo intentionally avoids pretending fictional provider data is real.</p>`;
+    ${p.website ? `<p><a class="button secondary" href="${escapeHtml(p.website)}" target="_blank" rel="noopener noreferrer">Visit provider website ↗</a></p>` : ''}`;
   els.profileDialog.showModal();
 }
 
@@ -383,4 +376,4 @@ document.getElementById('menuButton').addEventListener('click', () => {
 });
 document.querySelectorAll('#primaryNav a').forEach(a => a.addEventListener('click', () => document.getElementById('primaryNav').classList.remove('open')));
 
-render();
+loadProviders();
