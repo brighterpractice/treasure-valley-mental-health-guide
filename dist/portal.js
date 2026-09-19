@@ -33,6 +33,43 @@ function setChips(field, values = []) {
     chip.classList.toggle('active', values.includes(chip.dataset.value));
   });
 }
+function setCustomTags(id, values = []) {
+  const node = document.getElementById(id);
+  if (!node) return;
+  node.innerHTML = '';
+  values.filter(Boolean).forEach(value => {
+    const tag = document.createElement('span');
+    tag.className = 'custom-tag';
+    tag.dataset.value = value;
+    tag.textContent = value;
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.setAttribute('aria-label', `Remove ${value}`);
+    remove.textContent = '×';
+    remove.addEventListener('click', () => tag.remove());
+    tag.append(remove);
+    node.append(tag);
+  });
+}
+function getCustomTags(id) {
+  return [...document.querySelectorAll(`#${id} .custom-tag`)].map(tag => tag.dataset.value);
+}
+function addCustomTag(inputId, listId) {
+  const input = document.getElementById(inputId);
+  const value = input.value.trim();
+  if (!value) return;
+  const existing = getCustomTags(listId);
+  if (!existing.some(item => item.toLowerCase() === value.toLowerCase())) {
+    setCustomTags(listId, [...existing, value]);
+  }
+  input.value = '';
+  input.focus();
+}
+function normalizeWebsiteUrl(value) {
+  const trimmed = value.trim();
+  if (!trimmed) return '';
+  return `https://${trimmed.replace(/^https?:\/\//i, '')}`;
+}
 function getChips(field) {
   return [...document.querySelectorAll(`.profile-chips[data-field="${field}"] .filter-chip.active`)].map(chip => chip.dataset.value);
 }
@@ -52,6 +89,11 @@ function populateProfile(row) {
   });
   setChips('specialties', row?.specialties || []);
   setChips('approaches', row?.approaches || []);
+  const builtInSpecialties = [...document.querySelectorAll('.profile-chips[data-field="specialties"] .filter-chip')].map(chip => chip.dataset.value);
+  const builtInApproaches = [...document.querySelectorAll('.profile-chips[data-field="approaches"] .filter-chip')].map(chip => chip.dataset.value);
+  setCustomTags('customSpecialties', (row?.specialties || []).filter(value => !builtInSpecialties.includes(value)));
+  setCustomTags('customApproaches', (row?.approaches || []).filter(value => !builtInApproaches.includes(value)));
+  setCustomTags('customServices', row?.services || []);
   const first = row?.first_name || '';
   const last = row?.last_name || '';
   const name = `${first} ${last}`.trim() || session.user.email;
@@ -68,11 +110,12 @@ function formPayload() {
     primary_city: document.getElementById('primaryCity').value,
     years_in_practice: document.getElementById('yearsInPractice').value ? Number(document.getElementById('yearsInPractice').value) : null,
     short_bio: document.getElementById('shortBio').value.trim(),
-    website_url: document.getElementById('websiteUrl').value.trim(),
+    website_url: normalizeWebsiteUrl(document.getElementById('websiteUrl').value),
     availability: document.getElementById('availability').value,
     visit_types: [document.getElementById('visitType').value],
-    specialties: getChips('specialties'),
-    approaches: getChips('approaches')
+    specialties: [...getChips('specialties'), ...getCustomTags('customSpecialties')],
+    approaches: [...getChips('approaches'), ...getCustomTags('customApproaches')],
+    services: getCustomTags('customServices')
   };
 }
 async function saveProfile() {
@@ -114,6 +157,12 @@ async function submitProfile() {
 buttons.forEach(b => b.addEventListener('click', () => showPanel(b.dataset.panel)));
 document.querySelectorAll('[data-jump]').forEach(b => b.addEventListener('click', () => showPanel(b.dataset.jump)));
 document.querySelectorAll('.profile-chips .filter-chip').forEach(b => b.addEventListener('click', () => b.classList.toggle('active')));
+document.getElementById('addSpecialty')?.addEventListener('click', () => addCustomTag('customSpecialtyInput', 'customSpecialties'));
+document.getElementById('customSpecialtyInput')?.addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); addCustomTag('customSpecialtyInput', 'customSpecialties'); } });
+document.getElementById('addService')?.addEventListener('click', () => addCustomTag('customServiceInput', 'customServices'));
+document.getElementById('customServiceInput')?.addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); addCustomTag('customServiceInput', 'customServices'); } });
+document.getElementById('addApproach')?.addEventListener('click', () => addCustomTag('customApproachInput', 'customApproaches'));
+document.getElementById('customApproachInput')?.addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); addCustomTag('customApproachInput', 'customApproaches'); } });
 document.getElementById('saveProfile')?.addEventListener('click', saveProfile);
 document.getElementById('submitProfile')?.addEventListener('click', submitProfile);
 document.getElementById('signOut')?.addEventListener('click', async () => { await supabase.auth.signOut(); location.href = 'provider-login.html'; });
