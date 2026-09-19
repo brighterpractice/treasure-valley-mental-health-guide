@@ -146,11 +146,7 @@ function renderProfile(p) {
           <div class="advanced-profile-detail"><span>Verification</span><strong>${esc(verified(p.last_verified_at,p.demo))}</strong></div>
         </article>
 
-        <article class="advanced-profile-card advanced-profile-media-preview">
-          <p class="eyebrow">Advanced profile space</p>
-          <h3>Room for a richer introduction.</h3>
-          <p>Additional office photos and locations can appear here as those Advanced features are connected.</p>
-        </article>
+
       </aside>
     </section>
   `;
