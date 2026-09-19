@@ -465,3 +465,6 @@
 .resource-related a{padding:1.1rem;border-radius:.65rem;background:#fff;color:var(--align-ink);text-decoration:none;font-weight:750}
 @media(max-width:900px){.resource-mini-hero-grid,.home-directory-teaser-grid,.resource-layout{grid-template-columns:1fr}.resource-hub-grid,.resource-related-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:620px){.resource-hub-grid,.resource-related-grid{grid-template-columns:1fr}}
+
+.resource-updated{margin-top:1rem!important;color:var(--align-muted)!important;font-size:.78rem}
+.resource-updated a{color:var(--align-blue-3)}
