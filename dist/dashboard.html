@@ -11,7 +11,7 @@
 <div class="portal-shell">
   <aside class="portal-sidebar">
     <a class="brand portal-brand" href="index.html"><span class="brand-mark">⌁</span><span><strong>Treasure Valley</strong><small>Mental Health Guide</small></span></a>
-    <div class="portal-account"><div class="avatar-sm">LB</div><div><strong>Lisa Bright</strong><small>Bright Hope Therapy</small></div></div>
+    <div class="portal-account"><div class="avatar-sm" id="accountAvatar">TV</div><div><strong id="accountName">Provider account</strong><small id="accountPractice">Complete your profile</small></div></div>
     <nav class="portal-nav">
       <button class="active" data-panel="overview">Overview</button>
       <button data-panel="profile">My Profile</button>
@@ -20,11 +20,11 @@
       <button data-panel="qr">QR Code <span class="pro-dot">ADV</span></button>
       <button data-panel="billing">Plan & Billing</button>
     </nav>
-    <div class="portal-sidebar-bottom"><a href="index.html">← View public guide</a><span>Prototype portal</span></div>
+    <div class="portal-sidebar-bottom"><a href="index.html">← View public guide</a><button class="text-button" id="signOut">Sign out</button></div>
   </aside>
 
   <main class="portal-main">
-    <header class="portal-topbar"><div><span class="eyebrow">Provider portal</span><h2 id="panelTitle">Overview</h2></div><div class="portal-actions"><span class="status-pill">● Published</span><button class="button secondary small-btn" id="previewBtn">Preview profile</button></div></header>
+    <header class="portal-topbar"><div><span class="eyebrow">Provider portal</span><h2 id="panelTitle">Overview</h2></div><div class="portal-actions"><span class="status-pill" id="publicationStatus">● Draft</span><button class="button secondary small-btn" id="previewBtn">Preview profile</button></div></header>
 
     <section class="portal-panel active" id="panel-overview">
       <div class="dashboard-grid top-metrics">
@@ -37,17 +37,17 @@
     </section>
 
     <section class="portal-panel" id="panel-profile">
-      <div class="portal-card"><div class="card-heading"><div><span class="eyebrow">Public information</span><h3>Edit profile</h3></div><button class="button primary small-btn" id="saveProfile">Save changes</button></div>
+      <div class="portal-card"><div class="card-heading"><div><span class="eyebrow">Public information</span><h3>Edit profile</h3><p id="profileMessage" class="auth-message" role="status" aria-live="polite"></p></div><div><button class="button secondary small-btn" id="submitProfile">Submit for review</button> <button class="button primary small-btn" id="saveProfile">Save changes</button></div></div>
         <div class="form-grid">
-          <label>First name<input class="input" value="Lisa"></label><label>Last name<input class="input" value="Bright"></label>
-          <label>Credentials<input class="input" value="LCPC"></label><label>Practice name<input class="input" value="Bright Hope Therapy"></label>
-          <label>Primary city<select class="input"><option selected>Meridian</option><option>Boise</option><option>Eagle</option><option>Nampa</option></select></label><label>Years in practice<input class="input" type="number" value="8"></label>
-          <label class="span-2">Short bio<textarea class="input textarea">Individual counseling for adults with an emphasis on trauma, anxiety, life transitions, and holistic wellness. EMDR trained.</textarea></label>
-          <label>Website<input class="input" value="https://brighthopetherapy.com"></label><label>Scheduling URL<input class="input" placeholder="https://..."></label>
-          <label>Availability<select class="input"><option selected>Accepting new clients</option><option>Waitlist</option><option>Not accepting</option></select></label><label>Visit type<select class="input"><option selected>In-person & telehealth</option><option>In-person</option><option>Telehealth</option></select></label>
+          <label>First name<input id="firstName" class="input" required></label><label>Last name<input id="lastName" class="input" required></label>
+          <label>Credentials<input id="credentials" class="input" required></label><label>Practice name<input id="practiceName" class="input"></label>
+          <label>Primary city<select id="primaryCity" class="input"><option value="">Choose a city</option><option>Meridian</option><option>Boise</option><option>Eagle</option><option>Nampa</option><option>Kuna</option><option>Star</option><option>Caldwell</option></select></label><label>Years in practice<input id="yearsInPractice" class="input" type="number" min="0" max="80"></label>
+          <label class="span-2">Short bio<textarea id="shortBio" class="input textarea" required maxlength="1500"></textarea></label>
+          <label>Website<input id="websiteUrl" class="input" type="url" placeholder="https://..."></label><label>Scheduling URL<input class="input" placeholder="Coming soon"></label>
+          <label>Availability<select id="availability" class="input"><option>Not specified</option><option>Accepting new clients</option><option>Waitlist</option><option>Not accepting</option></select></label><label>Visit type<select id="visitType" class="input"><option value="In-person & telehealth">In-person & telehealth</option><option value="In-person">In-person</option><option value="Telehealth">Telehealth</option></select></label>
         </div>
-        <div class="edit-block"><h4>Specialties</h4><div class="chip-options static-chips"><button class="filter-chip active">Trauma</button><button class="filter-chip active">Anxiety</button><button class="filter-chip active">Life Transitions</button><button class="filter-chip">Grief</button><button class="filter-chip">OCD</button><button class="filter-chip">Relationships</button></div></div>
-        <div class="edit-block"><h4>Modalities / approaches</h4><div class="chip-options static-chips"><button class="filter-chip active">EMDR</button><button class="filter-chip active">Person-centered</button><button class="filter-chip">CBT</button><button class="filter-chip">ACT</button><button class="filter-chip">DBT-informed</button></div></div>
+        <div class="edit-block"><h4>Specialties</h4><div class="chip-options profile-chips" data-field="specialties"><button type="button" class="filter-chip" data-value="Trauma">Trauma</button><button type="button" class="filter-chip" data-value="Anxiety">Anxiety</button><button type="button" class="filter-chip" data-value="Life Transitions">Life Transitions</button><button type="button" class="filter-chip" data-value="Grief">Grief</button><button type="button" class="filter-chip" data-value="OCD">OCD</button><button type="button" class="filter-chip" data-value="Relationships">Relationships</button></div></div>
+        <div class="edit-block"><h4>Modalities / approaches</h4><div class="chip-options profile-chips" data-field="approaches"><button type="button" class="filter-chip" data-value="EMDR">EMDR</button><button type="button" class="filter-chip" data-value="Person-centered">Person-centered</button><button type="button" class="filter-chip" data-value="CBT">CBT</button><button type="button" class="filter-chip" data-value="ACT">ACT</button><button type="button" class="filter-chip" data-value="DBT-informed">DBT-informed</button></div></div>
       </div>
     </section>
 
@@ -81,6 +81,6 @@
 </div>
 
 <dialog class="profile-dialog" id="checkoutDialog"><button class="dialog-close" id="closeCheckout">×</button><div><div class="eyebrow">Payment handoff prototype</div><h2>Secure annual checkout</h2><p>The live version will create the checkout through the Brighter Sites payment API and redirect to Square-hosted checkout. No card details are stored by the directory.</p><div class="checkout-summary"><span>Treasure Valley Mental Health Guide</span><strong id="checkoutItem">Advanced Provider Listing — $49/year</strong></div><div class="flow-line"><span>Provider portal</span><b>→</b><span>Brighter Sites payment API</span><b>→</b><span>Square checkout</span><b>→</b><span>Webhook</span><b>→</b><span>Supabase plan update</span></div><button class="button primary wide" disabled>Continue to Square (prototype)</button></div></dialog>
-<script src="portal.js"></script>
+<script src="supabase-config.js"></script><script type="module" src="portal.js"></script>
 </body>
 </html>
