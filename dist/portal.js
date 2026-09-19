@@ -165,7 +165,7 @@ document.getElementById('addApproach')?.addEventListener('click', () => addCusto
 document.getElementById('customApproachInput')?.addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); addCustomTag('customApproachInput', 'customApproaches'); } });
 document.getElementById('saveProfile')?.addEventListener('click', saveProfile);
 document.getElementById('submitProfile')?.addEventListener('click', submitProfile);
-document.getElementById('signOut')?.addEventListener('click', async () => { await supabase.auth.signOut(); location.href = 'provider-login.html'; });
+document.getElementById('signOut')?.addEventListener('click', async () => { const { error } = await supabase.auth.signOut(); if (error) { say(error.message, 'error'); return; } location.replace('provider-login.html?signed_out=1'); });
 document.getElementById('previewBtn')?.addEventListener('click', () => location.href = 'index.html#find');
 
 function applyPlan(plan) {
