@@ -613,3 +613,22 @@ body {
 .analytics-empty{color:var(--muted);font-size:13px;padding:10px 0}
 .field-help{display:block;color:var(--muted);font-weight:400;margin-top:6px;line-height:1.45}
 @media(max-width:760px){.analytics-header{align-items:flex-start;flex-direction:column;gap:14px}.analytics-range{width:100%}.analytics-range label{flex:1}.analytics-range .input{min-width:0}}
+
+
+/* Advanced public profile blue palette */
+.advanced-profile-page{color:#17324d}
+.advanced-profile-hero{background:linear-gradient(180deg,#fbf8f1 0%,#eef3f8 100%)}
+.advanced-profile-back{color:#315f8b}
+.advanced-profile-avatar{background:#e4edf5;color:#234e76}
+.advanced-profile-heading h1{color:#17324d}
+.advanced-profile-heading>p{color:#5f7286}
+.advanced-profile-chips span,.advanced-profile-tag-group span{background:#eef3f8;color:#315f8b}
+.advanced-profile-contact{background:#edf3f8}
+.advanced-profile-card h2{color:#17324d}
+.advanced-profile-card h3{color:#234e76}
+.advanced-profile-bio{color:#42586d}
+.advanced-profile-two-col>div{background:#eef3f8}
+.advanced-profile-detail{border-bottom-color:#dde6ee}
+.advanced-profile-detail span{color:#7a8b9b}
+.advanced-profile-detail strong{color:#234e76}
+.public-qr-item{background:#eef3f8}
