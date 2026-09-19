@@ -1,2 +1,8 @@
-document.getElementById('heroSearch').addEventListener('submit',e=>{e.preventDefault();const input=document.getElementById('searchText');input.value=document.getElementById('heroConcern').value;input.dispatchEvent(new Event('input',{bubbles:true}));document.getElementById('find').scrollIntoView({behavior:'smooth'});});
-document.querySelectorAll('.align-signal-list a').forEach(a=>{if(a.hash==='#find')return;a.addEventListener('click',e=>{e.preventDefault();document.getElementById('resourceTitle').textContent=a.querySelector('h3').textContent;document.getElementById('resourceDialog').showModal();});});
+const heroSearch=document.getElementById('heroSearch');
+heroSearch?.addEventListener('submit',event=>{
+  event.preventDefault();
+  const query=document.getElementById('heroConcern')?.value.trim()||'';
+  const url=new URL('find-counselor.html',location.href);
+  if(query) url.searchParams.set('q',query);
+  location.href=url.toString();
+});
