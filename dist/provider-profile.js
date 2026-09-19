@@ -37,6 +37,34 @@ const demoAdvancedProfiles = {
   }
 };
 
+function visitorKey() {
+  const keyName = 'tvmh_anonymous_visitor';
+  let value = localStorage.getItem(keyName);
+  if (!value) {
+    value = crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    localStorage.setItem(keyName, value);
+  }
+  return value;
+}
+async function recordProviderEvent(provider, eventKind, source = 'advanced_profile') {
+  if (!supabase || !provider || provider.demo) return;
+  try {
+    await supabase.rpc('record_provider_event', {
+      target_provider_id: provider.id,
+      event_kind: eventKind,
+      anonymous_visitor_key: visitorKey(),
+      specialty_values: [],
+      approach_values: [],
+      city_value: '',
+      visit_value: '',
+      insurance_value: '',
+      source_value: source
+    });
+  } catch (error) {
+    console.error('Analytics event could not be recorded', error);
+  }
+}
+
 function esc(value) {
   return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[ch]));
 }
@@ -87,16 +115,16 @@ async function renderPublicQrs(p) {
 function renderProfile(p) {
   const fullName = `${p.first_name || ''} ${p.last_name || ''}`.trim();
   document.title = `${fullName || 'Provider'} | Treasure Valley Mental Health Guide`;
-  const website = p.website_url ? `<a class="button primary" href="${esc(p.website_url)}" target="_blank" rel="noopener noreferrer">Visit provider website ↗</a>` : '';
-  const clientPortal = p.client_portal_url ? `<a class="button secondary" href="${esc(p.client_portal_url)}" target="_blank" rel="noopener noreferrer">Client portal ↗</a>` : '';
+  const website = p.website_url ? `<a class="button primary" data-analytics-event="website_click" href="${esc(p.website_url)}" target="_blank" rel="noopener noreferrer">Visit provider website ↗</a>` : '';
+  const clientPortal = p.client_portal_url ? `<a class="button secondary" data-analytics-event="portal_click" href="${esc(p.client_portal_url)}" target="_blank" rel="noopener noreferrer">Client portal ↗</a>` : '';
   const videoEmbed = youtubeEmbedUrl(p.video_url);
   const publicQrCard = (p.show_website_qr && p.website_url) || (p.show_portal_qr && p.client_portal_url)
     ? `<article class="advanced-profile-card public-qr-card">
         <p class="eyebrow">Quick access</p>
         <h3>Scan to connect.</h3>
         <div class="public-qr-grid">
-          ${p.show_website_qr && p.website_url ? `<a class="public-qr-item" href="${esc(p.website_url)}" target="_blank" rel="noopener noreferrer"><canvas id="publicWebsiteQr" width="190" height="190" aria-label="QR code for provider website"></canvas><strong>Practice website</strong><span>Scan or tap to visit</span></a>` : ''}
-          ${p.show_portal_qr && p.client_portal_url ? `<a class="public-qr-item" href="${esc(p.client_portal_url)}" target="_blank" rel="noopener noreferrer"><canvas id="publicPortalQr" width="190" height="190" aria-label="QR code for client or scheduling portal"></canvas><strong>Client / scheduling portal</strong><span>Scan or tap to open</span></a>` : ''}
+          ${p.show_website_qr && p.website_url ? `<a class="public-qr-item" data-analytics-event="website_click" href="${esc(p.website_url)}" target="_blank" rel="noopener noreferrer"><canvas id="publicWebsiteQr" width="190" height="190" aria-label="QR code for provider website"></canvas><strong>Practice website</strong><span>Scan or tap to visit</span></a>` : ''}
+          ${p.show_portal_qr && p.client_portal_url ? `<a class="public-qr-item" data-analytics-event="portal_click" href="${esc(p.client_portal_url)}" target="_blank" rel="noopener noreferrer"><canvas id="publicPortalQr" width="190" height="190" aria-label="QR code for client or scheduling portal"></canvas><strong>Client / scheduling portal</strong><span>Scan or tap to open</span></a>` : ''}
         </div>
       </article>`
     : '';
@@ -176,6 +204,9 @@ function renderProfile(p) {
     </section>
   `;
   renderPublicQrs(p);
+  target.querySelectorAll('[data-analytics-event]').forEach(link => {
+    link.addEventListener('click', () => recordProviderEvent(p, link.dataset.analyticsEvent));
+  });
 }
 
 function showUnavailable() {
@@ -199,6 +230,7 @@ async function load() {
     return;
   }
   renderProfile(data[0]);
+  recordProviderEvent(data[0], 'profile_view', 'advanced_profile_direct');
 }
 
 load();
