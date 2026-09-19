@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
+import QRCode from 'https://esm.sh/qrcode@1.5.4';
 
 const cfg = window.TV_GUIDE_SUPABASE;
 const supabase = createClient(cfg.url, cfg.publishableKey);
@@ -14,6 +15,34 @@ function titleCase(v) { return v.charAt(0).toUpperCase() + v.slice(1); }
 function say(text, kind = '') {
   const node = document.getElementById('profileMessage');
   if (node) { node.textContent = text; node.dataset.kind = kind; }
+}
+function sayPanel(id, text, kind = '') {
+  const node = document.getElementById(id);
+  if (node) { node.textContent = text; node.dataset.kind = kind; }
+}
+function youtubeVideoId(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+  try {
+    const candidate = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+    const url = new URL(candidate);
+    const host = url.hostname.replace(/^www\./i, '').replace(/^m\./i, '').toLowerCase();
+    let id = '';
+    if (host === 'youtu.be') id = url.pathname.split('/').filter(Boolean)[0] || '';
+    if (host === 'youtube.com' || host.endsWith('.youtube.com')) {
+      if (url.pathname === '/watch') id = url.searchParams.get('v') || '';
+      else if (/^\/(shorts|embed)\//.test(url.pathname)) id = url.pathname.split('/').filter(Boolean)[1] || '';
+    }
+    return /^[A-Za-z0-9_-]{11}$/.test(id) ? id : '';
+  } catch {
+    return '';
+  }
+}
+function normalizeYouTubeUrl(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+  const id = youtubeVideoId(raw);
+  return id ? `https://www.youtube.com/watch?v=${id}` : '';
 }
 function applyPublicationStatus(status = 'draft') {
   const normalized = status || 'draft';
@@ -39,6 +68,7 @@ function showPanel(name) {
   panels.forEach(p => p.classList.toggle('active', p.id === `panel-${name}`));
   const btn = buttons.find(b => b.dataset.panel === name);
   title.textContent = btn ? btn.childNodes[0].textContent.trim() : titleCase(name);
+  if (name === 'qr') renderQrCode();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 function setValues(values) {
@@ -107,7 +137,9 @@ function populateProfile(row) {
     visitType: (row?.visit_types || [])[0] || 'In-person & telehealth',
     providerGender: row?.provider_gender || '',
     licenseState: row?.license_state || '',
-    licenseNumber: row?.license_number || ''
+    licenseNumber: row?.license_number || '',
+    videoUrl: row?.video_url || '',
+    clientPortalUrl: row?.client_portal_url || ''
   });
   setChips('specialties', row?.specialties || []);
   setChips('approaches', row?.approaches || []);
@@ -144,6 +176,8 @@ function formPayload() {
     provider_gender: document.getElementById('providerGender').value,
     license_state: document.getElementById('licenseState').value.trim(),
     license_number: document.getElementById('licenseNumber').value.trim(),
+    video_url: normalizeYouTubeUrl(document.getElementById('videoUrl')?.value || ''),
+    client_portal_url: normalizeWebsiteUrl(document.getElementById('clientPortalUrl')?.value || ''),
     populations: [...getChips('populations'), ...getCustomTags('customPopulations')],
     insurance: [...getChips('insurance'), ...getCustomTags('customInsurance')],
     specialties: [...getChips('specialties'), ...getCustomTags('customSpecialties')],
@@ -153,6 +187,12 @@ function formPayload() {
 }
 async function saveProfile() {
   say('Saving your profile…');
+  const videoInput = document.getElementById('videoUrl')?.value.trim() || '';
+  if (videoInput && !youtubeVideoId(videoInput)) {
+    say('Enter a valid YouTube video URL or leave the video field blank.', 'error');
+    sayPanel('mediaMessage', 'Enter a valid YouTube video URL.', 'error');
+    return false;
+  }
   const payload = formPayload();
   if (!payload.first_name || !payload.last_name || !payload.credentials || !payload.primary_city || !payload.short_bio) {
     say('Add your name, credentials, city, and bio before saving.', 'error');
@@ -184,6 +224,67 @@ async function loadProfile() {
   }
   applyPlan(currentPlan);
 }
+async function saveAdvanced(panelMessageId, successText) {
+  if (currentPlan !== 'advanced') {
+    sayPanel(panelMessageId, 'This feature is available with the Advanced plan.', 'error');
+    return false;
+  }
+  sayPanel(panelMessageId, 'Saving…');
+  const ok = await saveProfile();
+  if (ok) sayPanel(panelMessageId, successText, 'success');
+  return ok;
+}
+function qrDestination() {
+  const target = document.getElementById('qrTarget')?.value || 'website';
+  const raw = target === 'portal'
+    ? (document.getElementById('clientPortalUrl')?.value || '')
+    : (document.getElementById('websiteUrl')?.value || '');
+  return normalizeWebsiteUrl(raw);
+}
+async function renderQrCode() {
+  const canvas = document.getElementById('qrCanvas');
+  const targetValue = document.getElementById('qrTargetValue');
+  const caption = document.getElementById('qrCaption');
+  if (!canvas || !targetValue) return;
+  const url = qrDestination();
+  if (!url) {
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    targetValue.textContent = 'Add a URL for the selected destination.';
+    if (caption) caption.textContent = 'QR preview';
+    return;
+  }
+  targetValue.textContent = url;
+  if (caption) caption.textContent = document.getElementById('qrTarget')?.value === 'portal' ? 'Client portal QR' : 'Website QR';
+  try {
+    await QRCode.toCanvas(canvas, url, { width: 280, margin: 2, errorCorrectionLevel: 'M' });
+    sayPanel('qrMessage', 'QR code ready.', 'success');
+  } catch (error) {
+    console.error(error);
+    sayPanel('qrMessage', 'Unable to generate the QR code.', 'error');
+  }
+}
+async function copyQrDestination() {
+  const url = qrDestination();
+  if (!url) { sayPanel('qrMessage', 'Add a URL for the selected destination first.', 'error'); return; }
+  try {
+    await navigator.clipboard.writeText(url);
+    sayPanel('qrMessage', 'Destination copied.', 'success');
+  } catch {
+    sayPanel('qrMessage', 'Could not copy the destination automatically.', 'error');
+  }
+}
+async function downloadQr() {
+  const canvas = document.getElementById('qrCanvas');
+  const url = qrDestination();
+  if (!canvas || !url) { sayPanel('qrMessage', 'Generate a QR code first.', 'error'); return; }
+  await renderQrCode();
+  const link = document.createElement('a');
+  const kind = document.getElementById('qrTarget')?.value === 'portal' ? 'client-portal' : 'website';
+  link.download = `treasure-valley-${kind}-qr.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
 async function submitProfile() {
   if (!await saveProfile()) return;
   say('Submitting your profile for review…');
@@ -206,6 +307,14 @@ document.getElementById('customServiceInput')?.addEventListener('keydown', event
 document.getElementById('addApproach')?.addEventListener('click', () => addCustomTag('customApproachInput', 'customApproaches'));
 document.getElementById('customApproachInput')?.addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); addCustomTag('customApproachInput', 'customApproaches'); } });
 document.getElementById('saveProfile')?.addEventListener('click', saveProfile);
+document.getElementById('saveMedia')?.addEventListener('click', () => saveAdvanced('mediaMessage', 'Video saved.'));
+document.getElementById('saveQrLinks')?.addEventListener('click', async () => {
+  if (await saveAdvanced('qrMessage', 'Client portal link saved.')) renderQrCode();
+});
+document.getElementById('generateQr')?.addEventListener('click', renderQrCode);
+document.getElementById('qrTarget')?.addEventListener('change', renderQrCode);
+document.getElementById('copyQrLink')?.addEventListener('click', copyQrDestination);
+document.getElementById('downloadQr')?.addEventListener('click', downloadQr);
 document.getElementById('submitProfile')?.addEventListener('click', submitProfile);
 document.getElementById('signOut')?.addEventListener('click', async () => { const { error } = await supabase.auth.signOut(); if (error) { say(error.message, 'error'); return; } location.replace('provider-login.html?signed_out=1'); });
 document.getElementById('previewBtn')?.addEventListener('click', () => location.href = 'index.html#find');
