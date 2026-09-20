@@ -306,7 +306,7 @@ body {
 .featured-plan { border:2px solid #8fb4a1; box-shadow:0 24px 60px rgba(38,72,67,.12); transform:translateY(-6px); }
 .popular-label { position:absolute; right:20px; top:18px; border-radius:999px; background:var(--ink); color:white; padding:6px 9px; font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.08em; }
 .plan-top { display:flex; justify-content:space-between; align-items:start; gap:16px; }.plan-name{font-size:22px;font-weight:800;color:var(--ink)}
-.plan-price strong{font-family:"Fraunces",serif;font-size:40px;color:var(--ink)}.plan-price span{font-size:12px;color:var(--muted)}
+.plan-price{text-align:right}.plan-price strong{font-family:"Fraunces",serif;font-size:40px;color:var(--ink);line-height:1}.plan-price span{font-size:12px;color:var(--muted)}.plan-price small{display:block;margin-top:5px;color:var(--muted);font-size:11px;line-height:1.35}
 .feature-list { list-style:none; padding:0; margin:22px 0; display:grid; gap:10px; color:var(--text); font-size:14px; }.feature-list li::before{content:"✓";color:#4c806f;font-weight:900;margin-right:8px}
 .button.wide { width:100%; justify-content:center; text-align:center; }
 .managed-strip { max-width:940px; margin:22px auto 0; padding:22px 24px; border:1px dashed #b8c8bf; border-radius:18px; display:flex; align-items:center; justify-content:space-between; gap:30px; background:#fbfcf9; }.managed-strip h3{margin:2px 0 6px}.managed-strip p{margin:0}
