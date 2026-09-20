@@ -4,28 +4,28 @@ const ORIGIN = 'https://tvmentalhealthguide.org';
 
 const STATIC_PATHS = [
   '/',
-  '/find-counselor.html',
-  '/resources.html',
-  '/about.html',
-  '/editorial-policy.html',
-  '/directory-standards.html',
-  '/privacy.html',
+  '/find-counselor',
+  '/resources',
+  '/about',
+  '/editorial-policy',
+  '/directory-standards',
+  '/privacy',
   '/for-providers',
-  '/ptsd.html',
-  '/trauma.html',
-  '/emdr.html',
-  '/anxiety.html',
-  '/depression.html',
-  '/grief.html',
-  '/relationships.html',
-  '/psychiatry-medication.html',
-  '/telehealth.html',
-  '/choosing-a-counselor.html',
-  '/lower-cost-care.html',
-  '/community-assistance.html',
-  '/domestic-violence-safety.html',
-  '/substance-use.html',
-  '/crisis-help.html'
+  '/ptsd',
+  '/trauma',
+  '/emdr',
+  '/anxiety',
+  '/depression',
+  '/grief',
+  '/relationships',
+  '/psychiatry-medication',
+  '/telehealth',
+  '/choosing-a-counselor',
+  '/lower-cost-care',
+  '/community-assistance',
+  '/domestic-violence-safety',
+  '/substance-use',
+  '/crisis-help'
 ];
 
 function xmlEscape(value) {
@@ -45,8 +45,8 @@ export async function onRequestGet() {
   const lastmod = '2026-09-19';
   const entries = STATIC_PATHS.map(path => {
     if (path === '/') return entry(ORIGIN+'/',lastmod,'weekly','1.0');
-    if (path === '/find-counselor.html') return entry(ORIGIN+path,lastmod,'daily','0.9');
-    if (path === '/resources.html') return entry(ORIGIN+path,lastmod,'weekly','0.9');
+    if (path === '/find-counselor') return entry(ORIGIN+path,lastmod,'daily','0.9');
+    if (path === '/resources') return entry(ORIGIN+path,lastmod,'weekly','0.9');
     return entry(ORIGIN+path,lastmod,'monthly','0.7');
   });
 
@@ -67,7 +67,7 @@ export async function onRequestGet() {
         const modified = provider.last_verified_at
           ? new Date(provider.last_verified_at).toISOString().slice(0,10)
           : lastmod;
-        entries.push(entry(`${ORIGIN}/providers/${provider.public_slug}/`, modified, 'weekly', '0.8'));
+        entries.push(entry(`${ORIGIN}/providers/${provider.public_slug}`, modified, 'weekly', '0.8'));
       }
     }
   } catch {}
