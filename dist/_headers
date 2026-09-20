@@ -30,3 +30,7 @@
 
 /site.min.css
   Cache-Control: public, max-age=0, must-revalidate
+
+
+/provider-demo*
+  X-Robots-Tag: noindex, follow
