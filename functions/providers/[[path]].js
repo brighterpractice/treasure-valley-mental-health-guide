@@ -186,6 +186,11 @@ export async function onRequestGet(context) {
   const slug=String(parts[0]).toLowerCase();
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) return notFound();
 
+  const requestUrl = new URL(context.request.url);
+  if (requestUrl.pathname.endsWith('/')) {
+    return Response.redirect(`${ORIGIN}/providers/${slug}`, 301);
+  }
+
   let response;
   try {
     response=await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_directory_profile_by_slug`,{
