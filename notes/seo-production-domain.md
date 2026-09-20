@@ -57,3 +57,25 @@ It intentionally excludes:
 8. Run Lighthouse/Core Web Vitals against the live deployment.
 9. Implement permanent provider slugs before provider profile pages are indexed.
 10. Replace the current public-geocoder dependency with a production-ready geocoding arrangement and update the Privacy page if the data flow changes.
+
+## Cloudflare redirect rule
+
+Use `https://tvmentalhealthguide.org` as the only canonical origin.
+
+In Cloudflare, configure permanent 301 redirects so alternate hosts do not serve duplicate copies of the site:
+
+- `https://tvmentalhealthguide.com/*` → `https://tvmentalhealthguide.org/$1`
+- `https://www.tvmentalhealthguide.com/*` → `https://tvmentalhealthguide.org/$1`
+- `https://www.tvmentalhealthguide.org/*` → `https://tvmentalhealthguide.org/$1`
+
+If the default `*.pages.dev` hostname remains publicly reachable, prefer redirecting it to the matching path on `https://tvmentalhealthguide.org`. If Cloudflare Pages does not permit a host-level redirect from the project itself, use a Cloudflare Redirect Rule at the zone/account level.
+
+Use a 301 status so search engines consolidate signals to the `.org` URLs.
+
+After redirects are active, verify:
+- one-hop redirect to the matching `.org` path;
+- no redirect loops;
+- HTTPS works on every host before the redirect;
+- canonical tags still resolve to the final `.org` URL;
+- `https://tvmentalhealthguide.org/sitemap.xml` returns 200;
+- `https://tvmentalhealthguide.org/robots.txt` references that sitemap.
