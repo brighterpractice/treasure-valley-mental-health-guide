@@ -45,7 +45,7 @@ function metaDescription(p) {
   return base.length > 155 ? base.slice(0,152).trimEnd() + '…' : base;
 }
 function notFound() {
-  return new Response(`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex,follow"><title>Provider Not Found | Treasure Valley Mental Health Guide</title><link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/align-theme.css"><link rel="stylesheet" href="/warm-theme.css"></head><body class="warm-site"><main><section class="resource-hero"><div class="shell"><p class="eyebrow">Provider profile</p><h1>This provider profile is not available.</h1><p>The listing may have moved or may no longer be published.</p><a class="button primary" href="/find-counselor">Return to counselor directory</a></div></section></main></body></html>`,{status:404,headers:{'content-type':'text/html; charset=utf-8','x-robots-tag':'noindex, follow'}});
+  return new Response(`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex,follow"><title>Provider Not Found | Treasure Valley Mental Health Guide</title><link rel="stylesheet" href="/site.min.css"></head><body class="warm-site"><main><section class="resource-hero"><div class="shell"><p class="eyebrow">Provider profile</p><h1>This provider profile is not available.</h1><p>The listing may have moved or may no longer be published.</p><a class="button primary" href="/find-counselor">Return to counselor directory</a></div></section></main></body></html>`,{status:404,headers:{'content-type':'text/html; charset=utf-8','x-robots-tag':'noindex, follow'}});
 }
 
 function render(p) {
@@ -134,9 +134,9 @@ function render(p) {
 <meta name="twitter:description" content="${esc(description)}">
 <meta name="twitter:image" content="${ORIGIN}/assets/river-path.webp">
 <meta name="theme-color" content="#0d2946">
-<link rel="stylesheet" href="/styles.css">
-<link rel="stylesheet" href="/align-theme.css">
-<link rel="stylesheet" href="/warm-theme.css">
+
+
+
 <script type="application/ld+json">${safeJson}</script>
 </head>
 <body class="warm-site advanced-profile-page">

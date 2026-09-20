@@ -643,3 +643,50 @@
   .align-signal-list a{grid-template-columns:1.7rem minmax(0,1fr) auto}
   .align-signal-list h3,.align-signal-list p{overflow-wrap:anywhere}
 }
+
+
+/* Narrow viewport production safeguards */
+.card,
+.provider-card,
+.resource-card,
+.plan-card,
+.advanced-profile-card,
+.provider-preview-card {
+  min-width:0;
+}
+.provider-card h3,
+.provider-card p,
+.provider-card strong,
+.provider-card a,
+.resource-card h3,
+.resource-card p,
+.plan-card h3,
+.plan-card p,
+.plan-card li,
+.advanced-profile-card h2,
+.advanced-profile-card h3,
+.advanced-profile-card p,
+.advanced-profile-card strong {
+  overflow-wrap:anywhere;
+}
+.chip-options {
+  flex-wrap:wrap;
+  gap:.5rem;
+}
+@media(max-width:600px){
+  .warm-site input,
+  .warm-site select,
+  .warm-site textarea,
+  .provider-public-page input,
+  .provider-public-page select,
+  .provider-public-page textarea {
+    font-size:16px;
+  }
+}
+@media(max-width:380px){
+  .crisis-strip .shell{
+    flex-wrap:wrap;
+    gap:.25rem .45rem;
+    padding-inline:.75rem;
+  }
+}
