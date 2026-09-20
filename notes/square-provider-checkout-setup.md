@@ -66,7 +66,7 @@ For the Cloudflare Pages preview branch `feature/square-provider-checkout`, conf
 SQUARE_WEBHOOK_NOTIFICATION_URL=https://feature-square-provider-checkout.treasure-valley-mental-health-guide.pages.dev/api/payments/square-webhook
 ```
 
-During preview testing, the Square Sandbox webhook subscription must use that exact same notification URL. After the feature is merged to production, switch both Square and Cloudflare Production back to:
+During preview testing, the Square Sandbox webhook subscription must use that exact same notification URL. After saving Preview environment variables in Cloudflare, trigger a new Preview deployment so the Pages Functions receive the updated values. After the feature is merged to production, switch both Square and Cloudflare Production back to:
 
 ```text
 https://tvmentalhealthguide.org/api/payments/square-webhook
