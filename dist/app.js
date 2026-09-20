@@ -200,7 +200,7 @@ async function loadProviders() {
     return;
   }
 
-  const { data, error } = await supabase.rpc('list_directory_profiles', {
+  const { data, error } = await supabase.rpc('list_directory_profiles_v2', {
     page_size: 200,
     page_offset: 0
   });
@@ -526,7 +526,7 @@ function openProfile(id) {
     </div>
     <div class="profile-dialog-actions">
       ${p.website ? `<a class="button secondary" data-provider-website="${escapeHtml(p.id)}" href="${escapeHtml(p.website)}" target="_blank" rel="noopener noreferrer">Visit provider website ↗</a>` : ''}
-      ${p.plan === 'advanced' ? `<a class="button primary" href="provider-profile.html?id=${encodeURIComponent(p.id)}">View full profile →</a>` : ''}
+      ${p.publicSlug ? `<a class="button primary" href="/providers/${encodeURIComponent(p.publicSlug)}/">View profile →</a>` : ''}
     </div>`;
   els.profileDialog.querySelector('[data-provider-website]')?.addEventListener('click', () => recordProviderEvent(p, 'website_click'));
   els.profileDialog.showModal();
