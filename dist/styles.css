@@ -840,3 +840,12 @@ body {
 .demo-intent-row{display:flex;justify-content:space-between;gap:20px;padding:9px 0;border-bottom:1px solid #edf1f4;font-size:13px}.demo-intent-row:last-child{border-bottom:0}
 @media(max-width:900px){.demo-profile-intro{grid-template-columns:90px 1fr}.demo-profile-photo{width:90px;height:90px}.demo-profile-intro .advanced-profile-contact{grid-column:1/-1}.demo-dashboard-shell{grid-template-columns:1fr}.demo-dashboard-nav nav{grid-template-columns:repeat(5,minmax(0,1fr));overflow:auto}.demo-stat-grid{grid-template-columns:1fr 1fr}.demo-analytics-grid{grid-template-columns:1fr}.demo-office-gallery{grid-template-columns:1fr}}
 @media(max-width:600px){.demo-profile-intro{grid-template-columns:1fr}.demo-stat-grid{grid-template-columns:1fr}.demo-qr-grid{grid-template-columns:1fr}.demo-controls{align-items:stretch}.demo-plan-switch,.demo-view-switch{width:100%;justify-content:center}}
+
+/* Provider annual billing choices */
+.billing-mode-options{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:4px 0 22px}
+.billing-mode-card{display:grid;gap:5px;text-align:left;border:1px solid var(--line);border-radius:15px;background:#fff;padding:16px;color:var(--text);cursor:pointer}
+.billing-mode-card b{color:var(--ink)}
+.billing-mode-card span{font-size:12px;line-height:1.45;color:var(--muted)}
+.billing-mode-card.selected{border:2px solid #315f8b;background:#eef4fa}
+#billingStatusBadge{white-space:nowrap}
+@media(max-width:700px){.billing-mode-options{grid-template-columns:1fr}}

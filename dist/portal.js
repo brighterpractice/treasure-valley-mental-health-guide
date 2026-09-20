@@ -10,6 +10,9 @@ const qs = new URLSearchParams(location.search);
 let currentPlan = qs.get('plan') === 'basic' ? 'basic' : 'advanced';
 let session;
 let profile = null;
+let publicationStatus = 'draft';
+let billingMode = 'one_time';
+let billingSummary = null;
 
 function titleCase(v) { return v.charAt(0).toUpperCase() + v.slice(1); }
 function say(text, kind = '') {
@@ -44,9 +47,19 @@ function normalizeYouTubeUrl(value) {
   const id = youtubeVideoId(raw);
   return id ? `https://www.youtube.com/watch?v=${id}` : '';
 }
+function publicationLabel(status = 'draft') {
+  return ({
+    draft: 'Draft',
+    submitted: 'Submitted for review',
+    approved_pending_payment: 'Approved · payment required',
+    published: 'Published',
+    suspended: 'Suspended'
+  })[status] || titleCase(status);
+}
 function applyPublicationStatus(status = 'draft') {
   const normalized = status || 'draft';
-  document.getElementById('publicationStatus').textContent = `● ${titleCase(normalized)}`;
+  publicationStatus = normalized;
+  document.getElementById('publicationStatus').textContent = `● ${publicationLabel(normalized)}`;
   const submit = document.getElementById('submitProfile');
   if (!submit) return;
   if (normalized === 'published') {
@@ -57,9 +70,17 @@ function applyPublicationStatus(status = 'draft') {
     submit.disabled = true;
     submit.textContent = 'Publication suspended';
     submit.title = 'Contact the directory administrator before republishing.';
+  } else if (normalized === 'approved_pending_payment') {
+    submit.disabled = true;
+    submit.textContent = 'Approved · payment required';
+    submit.title = 'Complete annual payment before publication.';
+  } else if (normalized === 'submitted') {
+    submit.disabled = true;
+    submit.textContent = 'Submitted for review';
+    submit.title = 'Your submission is awaiting administrator review.';
   } else {
     submit.disabled = false;
-    submit.textContent = normalized === 'submitted' ? 'Submitted for review' : 'Submit for review';
+    submit.textContent = 'Submit for review';
     submit.title = '';
   }
 }
@@ -295,6 +316,7 @@ async function loadProfile() {
     }
   }
   applyPlan(currentPlan);
+  await loadBilling();
 }
 async function saveAdvanced(panelMessageId, successText) {
   if (currentPlan !== 'advanced') {
@@ -506,6 +528,80 @@ async function loadAnalytics() {
   renderSources('analyticsAccess', data?.access_preferences || []);
   sayPanel('analyticsMessage', views ? 'Analytics updated for the selected range.' : 'No tracked activity in this date range yet.', views ? 'success' : '');
 }
+
+function formatBillingDate(value) {
+  if (!value) return 'Not active';
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? 'Not active' : date.toLocaleDateString(undefined, { year:'numeric', month:'short', day:'numeric' });
+}
+function renderBilling(summary) {
+  billingSummary = summary || null;
+  const status = summary?.publication_status || publicationStatus || 'draft';
+  const billingStatus = summary?.billing_status || '';
+  const actualPlan = summary?.billing_plan || summary?.publication_plan || currentPlan;
+  const requiresPayment = Boolean(summary?.requires_payment);
+  billingMode = summary?.billing_mode || billingMode || 'one_time';
+
+  const badge = document.getElementById('billingStatusBadge');
+  const intro = document.getElementById('billingIntro');
+  const paidThrough = document.getElementById('billingPaidThrough');
+  const renewal = document.getElementById('billingRenewalSetting');
+  const pubStatus = document.getElementById('billingPublicationStatus');
+  const metricNote = document.getElementById('planMetricNote');
+
+  if (pubStatus) pubStatus.textContent = publicationLabel(status);
+  if (paidThrough) paidThrough.textContent = formatBillingDate(summary?.current_period_end);
+  if (renewal) {
+    renewal.textContent = summary?.cancel_at_period_end
+      ? 'Auto-renewal ends after current period'
+      : billingMode === 'auto_renew' ? 'Automatic annual renewal' : 'One year only';
+  }
+
+  let badgeText = 'Not active';
+  if (requiresPayment) badgeText = 'Payment required';
+  else if (billingStatus === 'active') badgeText = 'Active';
+  else if (billingStatus === 'grace_period') badgeText = 'Grace period';
+  else if (billingStatus === 'past_due') badgeText = 'Payment issue';
+  else if (billingStatus === 'expired') badgeText = 'Expired';
+  else if (billingStatus === 'canceled') badgeText = 'Canceled';
+  else if (status === 'published' && !billingStatus) badgeText = 'Beta / manual access';
+  if (badge) badge.textContent = badgeText;
+
+  if (intro) {
+    intro.textContent = requiresPayment
+      ? 'Your profile is approved. Complete annual payment to publish it in the directory.'
+      : status === 'submitted'
+        ? 'Your profile is awaiting administrator review. Payment is requested only after approval.'
+        : status === 'published'
+          ? 'Your listing is active. Turning off future renewal will not shorten the period you already paid for.'
+          : 'Choose a plan now. After administrator approval, payment activates the listing for one year.';
+  }
+  if (metricNote) metricNote.textContent = requiresPayment ? 'Approved · payment required' : badgeText;
+
+  if (actualPlan && ['basic','advanced'].includes(actualPlan) && !['draft','submitted'].includes(status)) {
+    applyPlan(actualPlan);
+  }
+
+  document.querySelectorAll('[data-billing-mode]').forEach(button => {
+    button.classList.toggle('selected', button.dataset.billingMode === billingMode);
+  });
+  const modeNode = document.getElementById('checkoutBillingMode');
+  if (modeNode) modeNode.textContent = billingMode === 'auto_renew' ? 'Automatic annual renewal' : 'One year only';
+}
+async function loadBilling() {
+  if (!profile?.id) {
+    renderBilling(null);
+    return;
+  }
+  const { data, error } = await supabase.rpc('provider_billing_summary');
+  if (error) {
+    sayPanel('billingMessage', error.message, 'error');
+    return;
+  }
+  const summary = Array.isArray(data) ? (data[0] || null) : data;
+  renderBilling(summary);
+}
+
 function applyPlan(plan) {
   currentPlan = plan;
   const advanced = plan === 'advanced';
@@ -529,12 +625,27 @@ function applyPlan(plan) {
 document.getElementById('applyAnalyticsRange')?.addEventListener('click', loadAnalytics);
 document.querySelectorAll('.plan-switch').forEach(b => b.addEventListener('click', async () => {
   const plan = b.dataset.plan === 'advanced' ? 'advanced' : 'basic';
+  if (!['draft','submitted'].includes(publicationStatus)) {
+    sayPanel('billingMessage', 'Plan changes after approval will be handled through billing so paid access and entitlements stay in sync.', 'error');
+    applyPlan(billingSummary?.publication_plan || billingSummary?.billing_plan || currentPlan);
+    return;
+  }
   applyPlan(plan);
   if (profile?.id) {
     const { error } = await supabase.from('provider_profiles').update({ requested_plan: plan }).eq('id', profile.id);
     if (error) sayPanel('billingMessage', error.message, 'error');
     else sayPanel('billingMessage', `${plan === 'advanced' ? 'Advanced' : 'Basic'} plan requested.`, 'success');
   }
+}));
+document.querySelectorAll('[data-billing-mode]').forEach(button => button.addEventListener('click', () => {
+  billingMode = button.dataset.billingMode === 'auto_renew' ? 'auto_renew' : 'one_time';
+  document.querySelectorAll('[data-billing-mode]').forEach(item => item.classList.toggle('selected', item === button));
+  document.getElementById('billingRenewalSetting').textContent = billingMode === 'auto_renew'
+    ? 'Automatic annual renewal'
+    : 'One year only';
+  document.getElementById('checkoutBillingMode').textContent = billingMode === 'auto_renew'
+    ? 'Automatic annual renewal'
+    : 'One year only';
 }));
 document.getElementById('checkoutDemo')?.addEventListener('click', () => document.getElementById('checkoutDialog').showModal());
 document.getElementById('closeCheckout')?.addEventListener('click', () => document.getElementById('checkoutDialog').close());
