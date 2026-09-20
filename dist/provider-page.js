@@ -51,3 +51,14 @@ async function renderQr(id, url) {
 if (profile?.showWebsiteQr && profile.websiteUrl) renderQr('publicWebsiteQr', profile.websiteUrl);
 if (profile?.showPortalQr && profile.portalUrl) renderQr('publicPortalQr', profile.portalUrl);
 record('profile_view');
+
+const menuButton = document.getElementById('menuButton');
+const primaryNav = document.getElementById('primaryNav');
+menuButton?.addEventListener('click', () => {
+  const open = primaryNav?.classList.toggle('open') || false;
+  menuButton.setAttribute('aria-expanded', String(open));
+});
+primaryNav?.querySelectorAll('a').forEach(link => link.addEventListener('click', () => {
+  primaryNav.classList.remove('open');
+  menuButton?.setAttribute('aria-expanded', 'false');
+}));
