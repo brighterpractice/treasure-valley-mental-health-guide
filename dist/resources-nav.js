@@ -1,4 +1,18 @@
 (() => {
+  if (!document.querySelector('.prelaunch-notice')) {
+    const notice = document.createElement('aside');
+    notice.className = 'prelaunch-notice';
+    notice.setAttribute('role', 'note');
+    notice.setAttribute('aria-label', 'Site launch status');
+    notice.innerHTML = `
+      <div class="shell prelaunch-notice-inner">
+        <p><strong>Coming soon.</strong> We’re currently adding local clinicians to the Treasure Valley Mental Health Guide. The directory will officially open once there are enough participating providers to make it useful.</p>
+        <a href="/for-providers">For providers →</a>
+      </div>
+    `;
+    document.body.prepend(notice);
+  }
+
   const dropdowns = [...document.querySelectorAll('.nav-dropdown')];
 
   function sync(details) {
