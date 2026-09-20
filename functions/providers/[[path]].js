@@ -176,6 +176,9 @@ ${qrCard}
 export async function onRequestGet(context) {
   const raw=context.params.path;
   const parts=(Array.isArray(raw)?raw:String(raw||'').split('/')).filter(Boolean);
+  if (parts.length === 0) {
+    return Response.redirect(ORIGIN + '/providers.html', 301);
+  }
   if (parts.length !== 1) return notFound();
   const slug=String(parts[0]).toLowerCase();
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) return notFound();
