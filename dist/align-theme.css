@@ -690,3 +690,14 @@
     padding-inline:.75rem;
   }
 }
+
+
+/* Align directory toolbar content with provider card insets */
+.align-results-toolbar{
+  padding:.75rem 1.25rem 1rem!important;
+}
+@media(max-width:760px){
+  .align-results-toolbar{
+    padding:1rem 1.25rem!important;
+  }
+}

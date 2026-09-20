@@ -782,3 +782,20 @@ body {
     gap:5px;
   }
 }
+
+
+/* Refined provider pricing badge */
+.provider-public-page .plan-badge-row{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  margin:-6px 0 18px;
+}
+.provider-public-page .plan-badge-row .popular-label{
+  position:static!important;
+  inset:auto!important;
+  margin:0!important;
+  display:inline-flex;
+  width:auto;
+  transform:none!important;
+}
