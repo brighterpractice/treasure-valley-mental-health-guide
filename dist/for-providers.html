@@ -27,16 +27,17 @@
 <body class="public-site provider-public-page">
 <header class="site-header public-header">
   <div class="shell nav-wrap">
-    <a class="brand" href="index.html"><span class="brand-mark"><svg viewBox="0 0 48 48"><path d="M9 31c6-10 10-15 15-15s9 5 15 15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><path d="M12 34c6-2 18-2 24 0" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><circle cx="24" cy="12" r="3" fill="currentColor"/></svg></span><span><strong>Treasure Valley</strong><small>Mental Health Guide</small></span></a>
+    <a class="brand" href="/"><span class="brand-mark"><svg viewBox="0 0 48 48"><path d="M9 31c6-10 10-15 15-15s9 5 15 15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><path d="M12 34c6-2 18-2 24 0" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><circle cx="24" cy="12" r="3" fill="currentColor"/></svg></span><span><strong>Treasure Valley</strong><small>Mental Health Guide</small></span></a>
     <button class="menu-button" id="menuButton" type="button" aria-expanded="false" aria-controls="primaryNav">Menu</button><nav class="primary-nav" id="primaryNav"><details class="nav-dropdown"><summary>Resources</summary><div class="nav-dropdown-menu">
-<a class="nav-dropdown-all" href="/resources.html"><strong>All resources</strong><span>Browse the full mental health resource library</span></a>
+<a class="nav-dropdown-all" href="/resources"><strong>All resources</strong><span>Browse the full mental health resource library</span></a>
 <a href="/resources.html#mental-health-topics"><strong>Mental Health Topics</strong><span>PTSD, trauma, anxiety, depression, grief & more</span></a>
 <a href="/resources.html#treatment-options"><strong>Treatment Options</strong><span>EMDR, psychiatry, couples counseling & telehealth</span></a>
 <a href="/resources.html#getting-care"><strong>Getting Care</strong><span>Choosing a counselor and lower-cost options</span></a>
 <a href="/resources.html#crisis-community-help"><strong>Crisis & Community Help</strong><span>Urgent support, safety and practical assistance</span></a>
-</div></details><a href="find-counselor.html">Find a Counselor</a><a href="/for-providers" class="active">For Providers</a><a href="provider-login.html">Provider Login</a></nav>
+</div></details><a href="/find-counselor">Find a Counselor</a><a href="/for-providers" class="active">For Providers</a><a href="/provider-login">Provider Login</a></nav>
   </div>
 </header>
+<div class="crisis-strip" role="note"><div class="shell">Need immediate help? <a href="tel:988">Call 988</a> or <a href="sms:988">text 988</a>. If there is immediate danger, call 911.</div></div>
 <main>
   <section class="provider-hero">
     <div class="shell provider-hero-grid">
@@ -44,7 +45,7 @@
         <div class="eyebrow">Provider directory</div>
         <h1>A local profile you control.</h1>
         <p class="hero-copy">Create your profile once, keep it accurate yourself, and let Treasure Valley residents discover you by specialty, location, insurance, modality, availability, and other practical preferences.</p>
-        <div class="hero-actions"><a class="button primary" href="#plans">Compare plans</a><a class="button secondary" href="provider-login.html">Preview provider portal</a></div>
+        <div class="hero-actions"><a class="button primary" href="#plans">Compare plans</a><a class="button secondary" href="/provider-login">Preview provider portal</a></div>
         <p class="microcopy">Organic directory position is never purchased. Default results are last-name A–Z; visitors may choose other sort options.</p>
       </div>
       <div class="provider-preview-card">
@@ -86,7 +87,7 @@
     </div>
   </section>
 </main>
-<footer class="site-footer wellness-footer"><div class="shell footer-grid"><div><strong>Treasure Valley Mental Health Guide</strong><p>Local counselor directory and mental health resource guide.</p></div><div><span>Guide</span><a href="about.html">About</a> · <a href="directory-standards.html">Directory standards</a> · <a href="privacy.html">Privacy</a></div><div><span>Technology</span><strong>Brighter Sites</strong></div></div></footer>
+<footer class="site-footer wellness-footer"><div class="shell footer-grid"><div><strong>Treasure Valley Mental Health Guide</strong><p>Local counselor directory and mental health resource guide.</p></div><div><span>Guide</span><a href="/about">About</a> · <a href="/directory-standards">Directory standards</a> · <a href="/privacy">Privacy</a></div><div><span>Technology</span><strong>Brighter Sites</strong></div></div></footer>
 <script>
 document.getElementById('menuButton')?.addEventListener('click',()=>{
   const nav=document.getElementById('primaryNav');
@@ -98,5 +99,6 @@ document.querySelectorAll('#primaryNav a').forEach(a=>a.addEventListener('click'
   document.getElementById('menuButton')?.setAttribute('aria-expanded','false');
 }));
 </script>
+<script src="/resources-nav.js" defer></script>
 </body>
 </html>
