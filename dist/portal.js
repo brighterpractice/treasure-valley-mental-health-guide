@@ -415,8 +415,8 @@ document.getElementById('downloadPortalQr')?.addEventListener('click', () => dow
 document.getElementById('submitProfile')?.addEventListener('click', submitProfile);
 document.getElementById('signOut')?.addEventListener('click', async () => { const { error } = await supabase.auth.signOut(); if (error) { say(error.message, 'error'); return; } location.replace('provider-login.html?signed_out=1'); });
 document.getElementById('previewBtn')?.addEventListener('click', () => {
-  if (profile?.public_slug) location.href = `/providers/${encodeURIComponent(profile.public_slug)}/`;
-  else location.href = '/find-counselor.html';
+  if (profile?.public_slug) location.href = `/providers/${encodeURIComponent(profile.public_slug)}`;
+  else location.href = '/find-counselor';
 });
 
 function isoDateLocal(date) {
