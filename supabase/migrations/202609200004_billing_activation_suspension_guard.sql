@@ -18,7 +18,6 @@ returns void language plpgsql security definer set search_path=''
 as $$
 declare publication_status_before text;
 begin
-  if auth.role()<>'service_role' then raise exception 'Service role required'; end if;
   if target_plan not in ('basic','advanced') then raise exception 'Plan must be basic or advanced'; end if;
   if target_billing_mode not in ('one_time','auto_renew') then raise exception 'Billing mode must be one_time or auto_renew'; end if;
   if target_period_end<=target_period_start then raise exception 'Billing period end must be after start'; end if;
