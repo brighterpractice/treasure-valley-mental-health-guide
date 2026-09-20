@@ -45,7 +45,9 @@ function metaDescription(p) {
   return base.length > 155 ? base.slice(0,152).trimEnd() + '…' : base;
 }
 function notFound() {
-  return new Response(`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex,follow"><title>Provider Not Found | Treasure Valley Mental Health Guide</title><link rel="stylesheet" href="/site.min.css"></head><body class="warm-site"><main><section class="resource-hero"><div class="shell"><p class="eyebrow">Provider profile</p><h1>This provider profile is not available.</h1><p>The listing may have moved or may no longer be published.</p><a class="button primary" href="/find-counselor">Return to counselor directory</a></div></section></main></body></html>`,{status:404,headers:{'content-type':'text/html; charset=utf-8','x-robots-tag':'noindex, follow'}});
+  return new Response(`<!doctype html><html lang="en" data-bs-analytics-page="404"><head><meta charset="utf-8"><meta name="robots" content="noindex,follow"><title>Provider Not Found | Treasure Valley Mental Health Guide</title><link rel="stylesheet" href="/site.min.css"></head><body class="warm-site"><main><section class="resource-hero"><div class="shell"><p class="eyebrow">Provider profile</p><h1>This provider profile is not available.</h1><p>The listing may have moved or may no longer be published.</p><a class="button primary" href="/find-counselor">Return to counselor directory</a></div></section></main><script type="application/json" data-bs-analytics-config>{"collectorUrl":"https://analytics.brightersites.app","siteKey":"bs_live_0998074e684bf2e616e9457f92ee7332c4ab39234d148bc7","scriptVersion":"1.0.1"}</script>
+<script src="/brighter-analytics.js?v=1.0.1" defer></script>
+</body></html>`,{status:404,headers:{'content-type':'text/html; charset=utf-8','x-robots-tag':'noindex, follow'}});
 }
 
 function render(p) {
@@ -173,6 +175,8 @@ ${qrCard}
 <script src="/supabase-config.js"></script>
 <script type="module" src="/provider-page.js"></script>
 <script src="/resources-nav.js" defer></script>
+<script type="application/json" data-bs-analytics-config>{"collectorUrl":"https://analytics.brightersites.app","siteKey":"bs_live_0998074e684bf2e616e9457f92ee7332c4ab39234d148bc7","scriptVersion":"1.0.1"}</script>
+<script src="/brighter-analytics.js?v=1.0.1" defer></script>
 </body></html>`;
 }
 
