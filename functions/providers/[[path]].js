@@ -142,7 +142,7 @@ function render(p) {
 <body class="warm-site advanced-profile-page">
 <header class="align-header"><div class="shell align-nav-shell">
 <a class="align-brand" href="/" aria-label="Treasure Valley Mental Health Guide home"><span class="align-brand-mark" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M8 35 20 15l8 12 5-8 7 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 38h30" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></span><span class="align-brand-copy"><strong>Treasure Valley</strong><small>Mental Health Guide</small></span></a>
-<nav class="align-primary-nav always-open" aria-label="Primary navigation"><a href="/resources.html">Resources</a><a href="/find-counselor.html">Find a counselor</a><a href="/providers.html">For providers</a></nav>
+<button class="menu-button align-menu-button" id="menuButton" type="button" aria-expanded="false" aria-controls="primaryNav">Menu</button><nav class="align-primary-nav" id="primaryNav" aria-label="Primary navigation"><a href="/resources.html">Resources</a><a href="/find-counselor.html">Find a counselor</a><a href="/providers.html">For providers</a></nav>
 </div></header>
 <main><section class="advanced-profile-hero"><div class="shell">
 <a class="advanced-profile-back" href="/find-counselor.html">← Back to counselor directory</a>
