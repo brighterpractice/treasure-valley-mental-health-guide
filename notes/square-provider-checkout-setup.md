@@ -58,6 +58,20 @@ Copy the webhook signature key into `SQUARE_WEBHOOK_SIGNATURE_KEY`.
 
 The value of `SQUARE_WEBHOOK_NOTIFICATION_URL` must exactly match the URL registered in Square because Square includes that URL when calculating the webhook signature.
 
+## Preview webhook testing
+
+For the Cloudflare Pages preview branch `feature/square-provider-checkout`, configure the same sandbox variables in the **Preview** environment. Use the stable branch alias rather than an individual deployment URL:
+
+```text
+SQUARE_WEBHOOK_NOTIFICATION_URL=https://feature-square-provider-checkout.treasure-valley-mental-health-guide.pages.dev/api/payments/square-webhook
+```
+
+During preview testing, the Square Sandbox webhook subscription must use that exact same notification URL. After the feature is merged to production, switch both Square and Cloudflare Production back to:
+
+```text
+https://tvmentalhealthguide.org/api/payments/square-webhook
+```
+
 ## Publication behavior
 
 The checkout endpoint requires all of the following:
