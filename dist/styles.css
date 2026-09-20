@@ -16,6 +16,29 @@
 }
 
 * { box-sizing: border-box; }
+
+/* Responsive media safeguards */
+img, svg, video, canvas {
+  max-width: 100%;
+}
+img {
+  height: auto;
+}
+.warm-photo {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin: 0;
+}
+.warm-photo img {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+}
+.warm-hero-grid > * {
+  min-width: 0;
+}
 html { scroll-behavior: smooth; }
 body {
   margin: 0;
