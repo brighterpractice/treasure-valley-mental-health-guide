@@ -527,7 +527,7 @@ function openProfile(id) {
     </div>
     <div class="profile-dialog-actions">
       ${p.website ? `<a class="button secondary" data-provider-website="${escapeHtml(p.id)}" href="${escapeHtml(p.website)}" target="_blank" rel="noopener noreferrer">Visit provider website ↗</a>` : ''}
-      ${p.publicSlug ? `<a class="button primary" href="/providers/${encodeURIComponent(p.publicSlug)}/">View profile →</a>` : ''}
+      ${p.publicSlug ? `<a class="button primary" href="/providers/${encodeURIComponent(p.publicSlug)}">View profile →</a>` : ''}
     </div>`;
   els.profileDialog.querySelector('[data-provider-website]')?.addEventListener('click', () => recordProviderEvent(p, 'website_click'));
   els.profileDialog.showModal();
