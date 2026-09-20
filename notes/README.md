@@ -4,7 +4,7 @@ Standalone prototype for a community mental-health resource and self-service loc
 
 ## Open these first
 - `index.html` — public resource hub + counselor search/matching
-- `providers.html` — provider-facing pricing and onboarding
+- `for-providers.html` — provider-facing pricing and onboarding (`/for-providers`)
 - `dashboard.html` — self-service provider portal prototype
 - `referral.html` — professional referral-link concept
 
