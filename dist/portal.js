@@ -261,20 +261,24 @@ async function saveProfile() {
     return false;
   }
   const payload = formPayload();
+  let geocodeWarning = '';
   if (payload.office_address) {
     if (payload.office_address !== (profile?.office_address || '') || !profile?.office_latitude || !profile?.office_longitude) {
       try {
         const geo = await geocodeAddress(payload.office_address);
-        if (!geo) {
-          say('We could not locate that office address. Check the address and try again.', 'error');
-          return false;
+        if (geo) {
+          payload.office_latitude = geo.lat;
+          payload.office_longitude = geo.lng;
+        } else {
+          payload.office_latitude = null;
+          payload.office_longitude = null;
+          geocodeWarning = ' Office address saved, but distance-search coordinates could not be determined yet.';
         }
-        payload.office_latitude = geo.lat;
-        payload.office_longitude = geo.lng;
       } catch (error) {
         console.error(error);
-        say('Office address lookup is temporarily unavailable. Try again shortly.', 'error');
-        return false;
+        payload.office_latitude = null;
+        payload.office_longitude = null;
+        geocodeWarning = ' Office address saved, but distance-search coordinates could not be updated right now.';
       }
     } else {
       payload.office_latitude = profile.office_latitude;
@@ -283,10 +287,6 @@ async function saveProfile() {
   } else {
     payload.office_latitude = null;
     payload.office_longitude = null;
-  }
-  if (!payload.first_name || !payload.last_name || !payload.credentials || !payload.primary_city || !payload.short_bio) {
-    say('Add your name, credentials, city, and bio before saving.', 'error');
-    return false;
   }
   const result = profile?.id
     ? await supabase.from('provider_profiles').update(payload).eq('id', profile.id).select().single()
@@ -298,7 +298,10 @@ async function saveProfile() {
     : null;
   const status = publication?.data?.status || 'draft';
   applyPublicationStatus(status);
-  say(status === 'published' ? 'Changes saved and updated on your live profile.' : 'Profile saved.', 'success');
+  const savedMessage = status === 'published'
+    ? 'Changes saved and updated on your live profile.'
+    : 'Draft saved.';
+  say(savedMessage + geocodeWarning, 'success');
   return true;
 }
 async function loadProfile() {
