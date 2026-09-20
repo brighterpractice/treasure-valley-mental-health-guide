@@ -45,7 +45,7 @@ function metaDescription(p) {
   return base.length > 155 ? base.slice(0,152).trimEnd() + '…' : base;
 }
 function notFound() {
-  return new Response(`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex,follow"><title>Provider Not Found | Treasure Valley Mental Health Guide</title><link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/align-theme.css"><link rel="stylesheet" href="/warm-theme.css"></head><body class="warm-site"><main><section class="resource-hero"><div class="shell"><p class="eyebrow">Provider profile</p><h1>This provider profile is not available.</h1><p>The listing may have moved or may no longer be published.</p><a class="button primary" href="/find-counselor.html">Return to counselor directory</a></div></section></main></body></html>`,{status:404,headers:{'content-type':'text/html; charset=utf-8','x-robots-tag':'noindex, follow'}});
+  return new Response(`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex,follow"><title>Provider Not Found | Treasure Valley Mental Health Guide</title><link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/align-theme.css"><link rel="stylesheet" href="/warm-theme.css"></head><body class="warm-site"><main><section class="resource-hero"><div class="shell"><p class="eyebrow">Provider profile</p><h1>This provider profile is not available.</h1><p>The listing may have moved or may no longer be published.</p><a class="button primary" href="/find-counselor">Return to counselor directory</a></div></section></main></body></html>`,{status:404,headers:{'content-type':'text/html; charset=utf-8','x-robots-tag':'noindex, follow'}});
 }
 
 function render(p) {
@@ -53,7 +53,7 @@ function render(p) {
   const credentials = p.credentials ? `, ${p.credentials}` : '';
   const title = `${fullName}${credentials} in ${p.primary_city}, Idaho | Treasure Valley Mental Health Guide`;
   const description = metaDescription(p);
-  const canonical = `${ORIGIN}/providers/${p.public_slug}/`;
+  const canonical = `${ORIGIN}/providers/${p.public_slug}`;
   const website = cleanUrl(p.website_url);
   const portal = p.plan === 'advanced' ? cleanUrl(p.client_portal_url) : '';
   const video = p.plan === 'advanced' ? youtubeEmbed(p.video_url) : '';
@@ -89,7 +89,7 @@ function render(p) {
         '@type':'BreadcrumbList',
         itemListElement:[
           {'@type':'ListItem',position:1,name:'Home',item:ORIGIN+'/'},
-          {'@type':'ListItem',position:2,name:'Find a Counselor',item:ORIGIN+'/find-counselor.html'},
+          {'@type':'ListItem',position:2,name:'Find a Counselor',item:ORIGIN+'/find-counselor'},
           {'@type':'ListItem',position:3,name:fullName,item:canonical}
         ]
       }
@@ -142,15 +142,16 @@ function render(p) {
 <body class="warm-site advanced-profile-page">
 <header class="align-header"><div class="shell align-nav-shell">
 <a class="align-brand" href="/" aria-label="Treasure Valley Mental Health Guide home"><span class="align-brand-mark" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M8 35 20 15l8 12 5-8 7 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 38h30" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></span><span class="align-brand-copy"><strong>Treasure Valley</strong><small>Mental Health Guide</small></span></a>
-<button class="menu-button align-menu-button" id="menuButton" type="button" aria-expanded="false" aria-controls="primaryNav">Menu</button><nav class="align-primary-nav" id="primaryNav" aria-label="Primary navigation"><details class="nav-dropdown"><summary>Resources</summary><div class="nav-dropdown-menu"><a class="nav-dropdown-all" href="/resources.html"><strong>All resources</strong><span>Browse the full mental health resource library</span></a><a href="/resources.html#mental-health-topics"><strong>Mental Health Topics</strong><span>PTSD, trauma, anxiety, depression, grief & more</span></a><a href="/resources.html#treatment-options"><strong>Treatment Options</strong><span>EMDR, psychiatry, couples counseling & telehealth</span></a><a href="/resources.html#getting-care"><strong>Getting Care</strong><span>Choosing a counselor and lower-cost options</span></a><a href="/resources.html#crisis-community-help"><strong>Crisis & Community Help</strong><span>Urgent support, safety and practical assistance</span></a></div></details><a href="/find-counselor.html">Find a counselor</a><a href="/for-providers">For providers</a></nav>
+<button class="menu-button align-menu-button" id="menuButton" type="button" aria-expanded="false" aria-controls="primaryNav">Menu</button><nav class="align-primary-nav" id="primaryNav" aria-label="Primary navigation"><details class="nav-dropdown"><summary>Resources</summary><div class="nav-dropdown-menu"><a class="nav-dropdown-all" href="/resources"><strong>All resources</strong><span>Browse the full mental health resource library</span></a><a href="/resources#mental-health-topics"><strong>Mental Health Topics</strong><span>PTSD, trauma, anxiety, depression, grief & more</span></a><a href="/resources#treatment-options"><strong>Treatment Options</strong><span>EMDR, psychiatry, couples counseling & telehealth</span></a><a href="/resources#getting-care"><strong>Getting Care</strong><span>Choosing a counselor and lower-cost options</span></a><a href="/resources#crisis-community-help"><strong>Crisis & Community Help</strong><span>Urgent support, safety and practical assistance</span></a></div></details><a href="/find-counselor">Find a counselor</a><a href="/for-providers">For providers</a></nav>
 </div></header>
+<div class="crisis-strip" role="note"><div class="shell">Need immediate help? <a href="tel:988">Call 988</a> or <a href="sms:988">text 988</a>. If there is immediate danger, call 911.</div></div>
 <main><section class="advanced-profile-hero"><div class="shell">
-<a class="advanced-profile-back" href="/find-counselor.html">← Back to counselor directory</a>
+<a class="advanced-profile-back" href="/find-counselor">← Back to counselor directory</a>
 <div class="advanced-profile-shell">
 <section class="advanced-profile-intro">
 <div class="advanced-profile-avatar">${esc(initials(p.first_name,p.last_name))}</div>
 <div class="advanced-profile-heading"><div class="eyebrow">Published provider profile</div><h1>${esc(fullName)}${esc(credentials)}</h1><p>${esc(p.practice_name || 'Independent practice')} · ${esc(p.primary_city || 'Treasure Valley')}</p><div class="advanced-profile-chips"><span>${esc(p.availability || 'Not specified')}</span>${(p.visit_types||[]).map(v=>`<span>${esc(v)}</span>`).join('')}</div></div>
-<aside class="advanced-profile-contact"><span class="advanced-profile-plan">${p.plan==='advanced'?'Advanced profile':'Provider profile'}</span><strong>${esc(p.practice_name || fullName)}</strong><small>${esc(p.primary_city || '')}</small>${websiteButton}${portalButton}<a class="button secondary" href="/find-counselor.html">Back to directory</a></aside>
+<aside class="advanced-profile-contact"><span class="advanced-profile-plan">${p.plan==='advanced'?'Advanced profile':'Provider profile'}</span><strong>${esc(p.practice_name || fullName)}</strong><small>${esc(p.primary_city || '')}</small>${websiteButton}${portalButton}<a class="button secondary" href="/find-counselor">Back to directory</a></aside>
 </section>
 <section class="advanced-profile-grid">
 <div class="advanced-profile-main">
@@ -163,13 +164,15 @@ ${videoCard}
 <aside class="advanced-profile-sidebar">
 <article class="advanced-profile-card"><p class="eyebrow">At a glance</p><div class="advanced-profile-detail"><span>Availability</span><strong>${esc(p.availability || 'Not specified')}</strong></div><div class="advanced-profile-detail"><span>Visits</span><strong>${list(p.visit_types)}</strong></div><div class="advanced-profile-detail"><span>Insurance / payment</span><strong>${list(p.insurance)}</strong></div><div class="advanced-profile-detail"><span>Provider gender</span><strong>${esc(p.provider_gender || 'Not specified')}</strong></div><div class="advanced-profile-detail"><span>Years in practice</span><strong>${p.years_in_practice ?? 'Not specified'}</strong></div>${license}<div class="advanced-profile-detail"><span>Verification</span><strong>${esc(verified(p.last_verified_at))}</strong></div></article>
 ${qrCard}
+<div class="profile-disclaimer"><strong>Directory notice:</strong> This guide provides directory information, not medical advice or an endorsement of any provider. Confirm credentials, availability, insurance, fees, and fit directly with the provider before beginning care.</div>
 </aside>
 </section>
 </div></div></section></main>
-<footer class="align-footer"><div class="shell align-footer-grid"><div><strong>Treasure Valley Mental Health Guide</strong><small>Local counselor directory</small></div><div><span class="footer-label">Guide</span><a href="/find-counselor.html">Find a counselor</a><a href="/resources.html">Resources</a></div><div><span class="footer-label">Trust</span><a href="/about.html">About</a><a href="/directory-standards.html">Directory standards</a><a href="/privacy.html">Privacy</a></div><div><span class="footer-label">Directory principle</span><small>Paid plans change profile features, not organic ranking.</small></div></div></footer>
+<footer class="align-footer"><div class="shell align-footer-grid"><div><strong>Treasure Valley Mental Health Guide</strong><small>Local counselor directory</small></div><div><span class="footer-label">Guide</span><a href="/find-counselor">Find a counselor</a><a href="/resources">Resources</a></div><div><span class="footer-label">Trust</span><a href="/about">About</a><a href="/directory-standards">Directory standards</a><a href="/privacy">Privacy</a></div><div><span class="footer-label">Directory principle</span><small>Paid plans change profile features, not organic ranking.</small></div></div></footer>
 <script>window.TV_PROVIDER_PAGE=${clientData};</script>
 <script src="/supabase-config.js"></script>
 <script type="module" src="/provider-page.js"></script>
+<script src="/resources-nav.js" defer></script>
 </body></html>`;
 }
 
