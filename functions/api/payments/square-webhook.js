@@ -122,13 +122,16 @@ export async function onRequestPost(context) {
   const { request, env } = context;
 
   let signatureKey;
-  let notificationUrl;
   try {
     signatureKey = getRequiredEnv(env, 'SQUARE_WEBHOOK_SIGNATURE_KEY');
-    notificationUrl = getRequiredEnv(env, 'SQUARE_WEBHOOK_NOTIFICATION_URL');
   } catch {
     return json({ error: 'Square webhooks are not configured.' }, 503);
   }
+
+  // Square signs the exact notification URL plus the raw request body.
+  // Using the URL that actually received the webhook keeps verification correct
+  // for both deployment-specific preview URLs and the production custom domain.
+  const notificationUrl = request.url;
 
   const signatureHeader =
     request.headers.get('x-square-hmacsha256-signature')?.trim() || '';
