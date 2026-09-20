@@ -170,6 +170,7 @@ function populateProfile(row) {
     licenseNumber: row?.license_number || '',
     videoUrl: row?.video_url || '',
     clientPortalUrl: row?.client_portal_url || '',
+    requestedPlan: row?.requested_plan || currentPlan,
     officeAddress: row?.office_address || ''
   });
   const showWebsiteQr = document.getElementById('showWebsiteQr');
@@ -217,6 +218,7 @@ function formPayload() {
     license_number: document.getElementById('licenseNumber').value.trim(),
     video_url: normalizeYouTubeUrl(document.getElementById('videoUrl')?.value || ''),
     client_portal_url: normalizeWebsiteUrl(document.getElementById('clientPortalUrl')?.value || ''),
+    requested_plan: currentPlan,
     show_website_qr: Boolean(document.getElementById('showWebsiteQr')?.checked),
     show_portal_qr: Boolean(document.getElementById('showPortalQr')?.checked),
     populations: [...getChips('populations'), ...getCustomTags('customPopulations')],
@@ -282,8 +284,11 @@ async function loadProfile() {
   if (data) {
     const publication = await supabase.from('provider_publication').select('status, plan').eq('provider_id', data.id).maybeSingle();
     if (publication.data) {
-      currentPlan = publication.data.plan || currentPlan;
-      applyPublicationStatus(publication.data.status || 'draft');
+      const status = publication.data.status || 'draft';
+      currentPlan = ['draft','submitted'].includes(status)
+        ? (data.requested_plan || publication.data.plan || currentPlan)
+        : (publication.data.plan || currentPlan);
+      applyPublicationStatus(status);
     }
   }
   applyPlan(currentPlan);
@@ -519,7 +524,15 @@ function applyPlan(plan) {
   }
 }
 document.getElementById('applyAnalyticsRange')?.addEventListener('click', loadAnalytics);
-document.querySelectorAll('.plan-switch').forEach(b => b.addEventListener('click', () => applyPlan(b.dataset.plan)));
+document.querySelectorAll('.plan-switch').forEach(b => b.addEventListener('click', async () => {
+  const plan = b.dataset.plan === 'advanced' ? 'advanced' : 'basic';
+  applyPlan(plan);
+  if (profile?.id) {
+    const { error } = await supabase.from('provider_profiles').update({ requested_plan: plan }).eq('id', profile.id);
+    if (error) sayPanel('billingMessage', error.message, 'error');
+    else sayPanel('billingMessage', `${plan === 'advanced' ? 'Advanced' : 'Basic'} plan requested.`, 'success');
+  }
+}));
 document.getElementById('checkoutDemo')?.addEventListener('click', () => document.getElementById('checkoutDialog').showModal());
 document.getElementById('closeCheckout')?.addEventListener('click', () => document.getElementById('checkoutDialog').close());
 
