@@ -130,19 +130,22 @@ function addCustomTag(inputId, listId) {
 async function geocodeAddress(value) {
   const address = String(value || '').trim();
   if (!address) return null;
-  const params = new URLSearchParams({
-    q: address,
-    format: 'jsonv2',
-    limit: '1',
-    countrycodes: 'us'
+  const response = await fetch('/api/geocode', {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+    credentials: 'same-origin',
+    cache: 'no-store',
+    body: JSON.stringify({ address })
   });
-  const response = await fetch(`https://nominatim.openstreetmap.org/search?${params.toString()}`, {
-    headers: { 'Accept': 'application/json' }
-  });
-  if (!response.ok) throw new Error('Address lookup failed');
-  const rows = await response.json();
-  if (!rows?.length) return null;
-  return { lat: Number(rows[0].lat), lng: Number(rows[0].lon) };
+  const result = await response.json().catch(() => null);
+  if (!response.ok) throw new Error(result?.error || 'Address lookup failed');
+  if (!result?.found) return null;
+  const lat = Number(result.lat);
+  const lng = Number(result.lng);
+  return Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng } : null;
 }
 function normalizeWebsiteUrl(value) {
   const trimmed = value.trim();
