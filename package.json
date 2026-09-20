@@ -1,0 +1,13 @@
+{
+  "name": "treasure-valley-mental-health-guide",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build-public-assets.mjs",
+    "build:assets": "node scripts/build-public-assets.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "sharp": "^0.34.0"
+  }
+}
