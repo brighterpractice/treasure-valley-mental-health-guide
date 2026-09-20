@@ -156,6 +156,7 @@ function formatVerifiedDate(value) {
 function mapDirectoryProfile(row) {
   return {
     id: String(row.id),
+    publicSlug: row.public_slug || '',
     name: `${row.first_name || ''} ${row.last_name || ''}`.trim(),
     credentials: row.credentials || '',
     practice: row.practice_name || 'Independent practice',
