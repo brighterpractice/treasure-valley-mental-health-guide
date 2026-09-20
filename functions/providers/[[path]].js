@@ -124,7 +124,7 @@ function render(p) {
 <title>${esc(title)}</title>
 <link rel="canonical" href="${esc(canonical)}">
 <meta name="description" content="${esc(description)}">
-<meta name="robots" content="index,follow,max-image-preview:large">
+<meta name="robots" content="noindex,follow,max-image-preview:large">
 <meta property="og:site_name" content="Treasure Valley Mental Health Guide">
 <meta property="og:type" content="profile">
 <meta property="og:title" content="${esc(title)}">
@@ -220,7 +220,8 @@ export async function onRequestGet(context) {
       'content-type':'text/html; charset=utf-8',
       'cache-control':'public, max-age=60, s-maxage=300, stale-while-revalidate=600',
       'x-content-type-options':'nosniff',
-      'referrer-policy':'strict-origin-when-cross-origin'
+      'referrer-policy':'strict-origin-when-cross-origin',
+      'x-robots-tag':'noindex, follow'
     }
   });
 }
