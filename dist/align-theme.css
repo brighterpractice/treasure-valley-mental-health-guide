@@ -468,3 +468,8 @@
 
 .resource-updated{margin-top:1rem!important;color:var(--align-muted)!important;font-size:.78rem}
 .resource-updated a{color:var(--align-blue-3)}
+
+.align-menu-button{min-height:44px}
+@media(max-width:950px){
+  .provider-public-page .menu-button{min-height:44px}
+}
