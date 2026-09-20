@@ -10,7 +10,7 @@ const STATIC_PATHS = [
   '/editorial-policy.html',
   '/directory-standards.html',
   '/privacy.html',
-  '/providers.html',
+  '/for-providers',
   '/ptsd.html',
   '/trauma.html',
   '/emdr.html',
