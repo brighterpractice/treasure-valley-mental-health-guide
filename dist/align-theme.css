@@ -589,3 +589,57 @@
   }
   .nav-dropdown-menu::before{display:none}
 }
+
+
+/* Launch safety and mobile polish */
+.nav-dropdown summary{
+  min-height:48px;
+  align-items:center;
+}
+.crisis-strip{
+  background:#0d2946;
+  color:#fffdf8;
+  font-size:.78rem;
+  line-height:1.45;
+}
+.crisis-strip .shell{
+  min-height:44px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:.6rem;
+  text-align:center;
+}
+.crisis-strip a{
+  color:#fffdf8;
+  font-weight:800;
+  text-decoration:underline;
+  text-underline-offset:2px;
+}
+.profile-disclaimer{
+  margin-top:1rem;
+  padding:1rem 1.1rem;
+  border:1px solid var(--align-line,#d2dde8);
+  border-radius:.65rem;
+  background:#f7fafc;
+  color:var(--align-body,#42586d);
+  font-size:.8rem;
+  line-height:1.55;
+}
+.guide-trust-links{
+  margin-top:1.2rem;
+  display:flex;
+  gap:.75rem 1.1rem;
+  flex-wrap:wrap;
+}
+.guide-trust-links a{
+  color:var(--align-blue-3,#315f8b);
+  font-weight:750;
+  text-decoration:none;
+}
+.guide-trust-links a:hover{text-decoration:underline}
+@media(max-width:560px){
+  .crisis-strip .shell{padding-block:.55rem}
+  .align-signal-list a{grid-template-columns:1.7rem minmax(0,1fr) auto}
+  .align-signal-list h3,.align-signal-list p{overflow-wrap:anywhere}
+}
