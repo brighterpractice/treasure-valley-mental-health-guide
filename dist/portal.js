@@ -414,7 +414,10 @@ document.getElementById('downloadWebsiteQr')?.addEventListener('click', () => do
 document.getElementById('downloadPortalQr')?.addEventListener('click', () => downloadQr('portal'));
 document.getElementById('submitProfile')?.addEventListener('click', submitProfile);
 document.getElementById('signOut')?.addEventListener('click', async () => { const { error } = await supabase.auth.signOut(); if (error) { say(error.message, 'error'); return; } location.replace('provider-login.html?signed_out=1'); });
-document.getElementById('previewBtn')?.addEventListener('click', () => location.href = 'index.html#find');
+document.getElementById('previewBtn')?.addEventListener('click', () => {
+  if (profile?.public_slug) location.href = `/providers/${encodeURIComponent(profile.public_slug)}/`;
+  else location.href = '/find-counselor.html';
+});
 
 function isoDateLocal(date) {
   const y = date.getFullYear();
