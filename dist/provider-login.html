@@ -9,12 +9,79 @@
   <link rel="stylesheet" href="/site.min.css">
 </head>
 <body class="warm-site auth-page">
-  <header class="align-header"><div class="shell align-nav-shell"><a class="align-brand" href="/"><span class="align-brand-mark" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M8 35 20 15l8 12 5-8 7 16M9 38h30" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="align-brand-copy"><strong>Treasure Valley</strong><small>Mental Health Guide</small></span></a><a class="gentle-link" href="/for-providers">For providers</a></div></header>
-  <main class="auth-main"><section class="auth-card" aria-labelledby="authTitle"><div class="eyebrow">Provider portal</div><h1 id="authTitle">Manage your local profile.</h1><p class="auth-lead">Sign in to maintain your listing, or create a provider account to get started.</p>
-    <div class="auth-tabs" role="tablist"><button class="auth-tab active" type="button" data-mode="signin">Sign in</button><button class="auth-tab" type="button" data-mode="signup">Create account</button></div>
-    <form id="authForm"><label for="email">Email address</label><input id="email" type="email" autocomplete="email" required placeholder="you@example.com"><label for="password">Password</label><input id="password" type="password" autocomplete="current-password" minlength="8" required placeholder="At least 8 characters"><button class="button primary auth-submit" type="submit">Sign in</button></form>
-    <p id="authMessage" class="auth-message" role="status" aria-live="polite"></p><p class="auth-note">You’ll receive a confirmation email when you create a new account. This portal is for provider directory profiles; it is not a client medical-record system.</p>
-  </section></main>
-  <script src="supabase-config.js"></script><script type="module" src="auth.js"></script>
+  <header class="align-header">
+    <div class="shell align-nav-shell">
+      <a class="align-brand" href="/">
+        <span class="align-brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 48 48"><path d="M8 35 20 15l8 12 5-8 7 16M9 38h30" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        <span class="align-brand-copy"><strong>Treasure Valley</strong><small>Mental Health Guide</small></span>
+      </a>
+      <a class="gentle-link" href="/for-providers">For providers</a>
+    </div>
+  </header>
+
+  <main class="auth-main">
+    <div class="shell auth-shell">
+      <section class="auth-card" aria-labelledby="authTitle">
+        <div class="auth-card-heading">
+          <div class="eyebrow">Provider portal</div>
+          <h1 id="authTitle">Welcome back.</h1>
+          <p class="auth-lead">Sign in to manage your directory profile, or create an account to get started.</p>
+        </div>
+
+        <div class="auth-tabs" role="tablist" aria-label="Provider account access">
+          <button class="auth-tab active" type="button" data-mode="signin">Sign in</button>
+          <button class="auth-tab" type="button" data-mode="signup">Create account</button>
+        </div>
+
+        <form id="authForm" class="auth-form">
+          <label for="email">Email address</label>
+          <input id="email" type="email" autocomplete="email" required placeholder="you@example.com">
+
+          <label for="password">Password</label>
+          <input id="password" type="password" autocomplete="current-password" minlength="8" required placeholder="At least 8 characters">
+
+          <button class="button primary auth-submit" type="submit">Sign in</button>
+        </form>
+
+        <p id="authMessage" class="auth-message" role="status" aria-live="polite"></p>
+
+        <div class="auth-note">
+          <span class="auth-note-icon" aria-hidden="true">i</span>
+          <p>You’ll receive a confirmation email when you create a new account. This portal manages provider directory profiles only; it is not a client medical-record system.</p>
+        </div>
+      </section>
+
+      <aside class="auth-side" aria-label="Provider portal benefits">
+        <div class="auth-side-mark" aria-hidden="true">
+          <svg viewBox="0 0 48 48"><path d="M8 35 20 15l8 12 5-8 7 16M9 38h30" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <p class="auth-side-kicker">For Treasure Valley providers</p>
+        <h2>Your local listing, in one place.</h2>
+        <p class="auth-side-copy">Keep your public information current and manage the parts of your listing that matter to prospective clients.</p>
+
+        <div class="auth-feature-list">
+          <div>
+            <span aria-hidden="true">01</span>
+            <p><strong>Update your profile</strong><small>Edit specialties, availability, insurance, contact information, and more.</small></p>
+          </div>
+          <div>
+            <span aria-hidden="true">02</span>
+            <p><strong>Manage your annual listing</strong><small>Choose Basic or Advanced and control annual renewal from your portal.</small></p>
+          </div>
+          <div>
+            <span aria-hidden="true">03</span>
+            <p><strong>See what’s working</strong><small>Advanced listings include privacy-conscious profile and search analytics.</small></p>
+          </div>
+        </div>
+
+        <a class="auth-side-link" href="/for-providers">Learn about provider listings <span aria-hidden="true">→</span></a>
+      </aside>
+    </div>
+  </main>
+
+  <script src="supabase-config.js"></script>
+  <script type="module" src="auth.js"></script>
 </body>
 </html>
