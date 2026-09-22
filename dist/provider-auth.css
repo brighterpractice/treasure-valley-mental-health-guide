@@ -360,3 +360,33 @@
 .auth-confirm-group[hidden]{
   display:none!important;
 }
+
+
+/* Password match status */
+.auth-password-status{
+  min-height:20px;
+  margin:3px 2px 0;
+  font-size:12px;
+  font-weight:800;
+  line-height:1.4;
+}
+.auth-password-status[data-state="pending"]{
+  color:#7b8b87;
+}
+.auth-password-status[data-state="match"]{
+  color:#2f6b50;
+}
+.auth-password-status[data-state="mismatch"]{
+  color:#a34732;
+}
+#confirmPassword[aria-invalid="false"]{
+  border-color:#6ea284;
+  box-shadow:0 0 0 3px rgba(69,129,91,.10);
+}
+#confirmPassword[aria-invalid="true"]{
+  border-color:#c98575;
+  box-shadow:0 0 0 3px rgba(163,71,50,.08);
+}
+.auth-submit:disabled{
+  cursor:not-allowed;
+}
