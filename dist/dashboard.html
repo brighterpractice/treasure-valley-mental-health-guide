@@ -25,15 +25,15 @@
   </aside>
 
   <main class="portal-main">
-    <header class="portal-topbar"><div><span class="eyebrow">Provider portal</span><h2 id="panelTitle">Overview</h2></div><div class="portal-actions"><span class="status-pill" id="publicationStatus">● Draft</span><button class="button secondary small-btn" id="previewBtn">Preview profile</button></div></header>
+    <header class="portal-topbar"><div><span class="eyebrow">Provider portal</span><h2 id="panelTitle">Overview</h2></div><div class="portal-actions"><span class="status-pill" id="publicationStatus">● Draft</span><button class="button secondary small-btn" id="previewBtn" disabled>Preview profile</button></div></header>
 
     <section class="portal-panel active" id="panel-overview">
       <div class="dashboard-grid top-metrics">
-        <article class="metric-card"><span>Profile completeness</span><strong>92%</strong><div class="progress"><i style="width:92%"></i></div><small>Add one more office photo to reach 100%.</small></article>
-        <article class="metric-card"><span>Plan</span><strong id="planMetric">Advanced</strong><small id="planMetricNote">Annual provider listing</small><button class="text-button" data-jump="billing">View billing</button></article>
-        <article class="metric-card"><span>Last verified</span><strong>Sep 19</strong><small>Information confirmed today.</small><button class="text-button">Confirm again</button></article>
+        <article class="metric-card"><span>Profile completeness</span><strong id="profileCompleteness">0%</strong><div class="progress"><i id="profileCompletenessBar" style="width:0%"></i></div><small id="profileCompletenessNote">Start your profile to begin.</small></article>
+        <article class="metric-card"><span>Plan</span><strong id="planMetric">Basic</strong><small id="planMetricNote">Not active</small><button class="text-button" data-jump="billing">View billing</button></article>
+        <article class="metric-card"><span>Last verified</span><strong id="lastVerifiedMetric">Not yet</strong><small id="lastVerifiedNote">Your listing has not been verified yet.</small></article>
       </div>
-      <div class="portal-card quick-tasks"><div class="card-heading"><div><span class="eyebrow">Profile maintenance</span><h3>Keep your listing current</h3></div><span class="badge subtle">Self-service</span></div><div class="task-grid"><button data-jump="profile"><b>Availability</b><span>Accepting new clients</span></button><button data-jump="profile"><b>Insurance</b><span>2 plans + self-pay</span></button><button data-jump="profile"><b>Specialties</b><span>3 selected</span></button><button data-jump="media"><b>Media</b><span>1 photo · no video</span></button></div></div>
+      <div class="portal-card quick-tasks"><div class="card-heading"><div><span class="eyebrow">Profile maintenance</span><h3>Keep your listing current</h3></div><span class="badge subtle">Self-service</span></div><div class="task-grid"><button data-jump="profile"><b>Availability</b><span id="availabilitySummary">Not set</span></button><button data-jump="profile"><b>Insurance</b><span id="insuranceSummary">None selected</span></button><button data-jump="profile"><b>Specialties</b><span id="specialtiesSummary">None selected</span></button><button data-jump="media"><b>Media</b><span id="mediaSummary">No video added</span></button></div></div>
       <div class="portal-card advanced-teaser" id="advancedInsight"><div><span class="eyebrow">Advanced insight</span><h3 id="advancedInsightHeadline">Your recent profile activity.</h3><p>Search-intent analytics use aggregated structured filters, not identifiable visitor histories or sensitive raw search text.</p></div><div class="teaser-stats"><span><b id="overviewViews">0</b> views</span><span><b id="overviewVisitors">0</b> visitors</span><span><b id="overviewClicks">0</b> site clicks</span></div></div>
     </section>
 
@@ -108,11 +108,11 @@
 
     <section class="portal-panel" id="panel-billing">
       <div class="portal-card">
-        <div class="card-heading"><div><span class="eyebrow">Annual plan</span><h3 id="billingPlanName">Advanced · $49/year</h3></div><span class="status-pill" id="billingStatusBadge">Not active</span></div>
+        <div class="card-heading"><div><span class="eyebrow">Annual plan</span><h3 id="billingPlanName">Basic · $12/year</h3></div><span class="status-pill" id="billingStatusBadge">Not active</span></div>
         <p id="billingIntro">Choose a plan now. After administrator approval, payment activates the listing for one year.</p>
         <div class="billing-options">
-          <button class="plan-switch" data-plan="basic"><span><b>Basic</b><small>Core self-service listing</small></span><strong>$12/year</strong></button>
-          <button class="plan-switch selected" data-plan="advanced"><span><b>Advanced</b><small>Media, QR and analytics</small></span><strong>$49/year</strong></button>
+          <button class="plan-switch selected" data-plan="basic"><span><b>Basic</b><small>Core self-service listing</small></span><strong>$12/year</strong></button>
+          <button class="plan-switch" data-plan="advanced"><span><b>Advanced</b><small>Media, QR and analytics</small></span><strong>$49/year</strong></button>
         </div>
         <div class="billing-mode-options" aria-label="Annual payment preference">
           <button class="billing-mode-card selected" type="button" data-billing-mode="one_time"><b>Pay for one year only</b><span>No automatic renewal. Renew manually when the year ends.</span></button>
@@ -129,7 +129,7 @@
   </main>
 </div>
 
-<dialog class="profile-dialog" id="checkoutDialog"><button class="dialog-close" id="closeCheckout">×</button><div><div class="eyebrow">Payment setup</div><h2>Secure annual checkout</h2><p>Square will host checkout, so the directory never stores card numbers. Automatic renewal is optional and will never be preselected. Turning it off later keeps the listing active through the already-paid period.</p><div class="checkout-summary"><span>Treasure Valley Mental Health Guide</span><strong id="checkoutItem">Advanced Provider Listing — $49/year</strong></div><div class="checkout-summary"><span>Payment preference</span><strong id="checkoutBillingMode">One year only</strong></div><div class="flow-line"><span>Administrator approval</span><b>→</b><span>Square checkout</span><b>→</b><span>Verified webhook</span><b>→</b><span>One year of access</span></div><button class="button primary wide" id="startSquareCheckout" type="button">Continue to Square</button></div></dialog>
-<script src="supabase-config.js"></script><script type="module" src="portal.js"></script>
+<dialog class="profile-dialog" id="checkoutDialog"><button class="dialog-close" id="closeCheckout">×</button><div><div class="eyebrow">Payment setup</div><h2>Secure annual checkout</h2><p>Square will host checkout, so the directory never stores card numbers. Automatic renewal is optional and will never be preselected. Turning it off later keeps the listing active through the already-paid period.</p><div class="checkout-summary"><span>Treasure Valley Mental Health Guide</span><strong id="checkoutItem">Basic Provider Listing — $12/year</strong></div><div class="checkout-summary"><span>Payment preference</span><strong id="checkoutBillingMode">One year only</strong></div><div class="flow-line"><span>Administrator approval</span><b>→</b><span>Square checkout</span><b>→</b><span>Verified webhook</span><b>→</b><span>One year of access</span></div><button class="button primary wide" id="startSquareCheckout" type="button">Continue to Square</button></div></dialog>
+<script src="supabase-config.js"></script><script type="module" src="portal.js?v=20260922-1"></script>
 </body>
 </html>
