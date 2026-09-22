@@ -7,7 +7,7 @@
   <meta name="description" content="Provider account access for the Treasure Valley Mental Health Guide.">
   <meta name="robots" content="noindex,nofollow">
   <link rel="stylesheet" href="/site.min.css">
-  <link rel="stylesheet" href="/provider-auth.css">
+  <link rel="stylesheet" href="/provider-auth.css?v=20260922-2">
 </head>
 <body class="warm-site auth-page">
   <header class="align-header">
@@ -32,8 +32,8 @@
         </div>
 
         <div class="auth-tabs" role="tablist" aria-label="Provider account access">
-          <button class="auth-tab active" type="button" data-mode="signin">Sign in</button>
-          <button class="auth-tab" type="button" data-mode="signup">Create account</button>
+          <button class="auth-tab active" type="button" data-mode="signin" aria-selected="true">Sign in</button>
+          <button class="auth-tab" type="button" data-mode="signup" aria-selected="false">Create account</button>
         </div>
 
         <form id="authForm" class="auth-form">
@@ -93,7 +93,68 @@
     </div>
   </main>
 
-  <script src="supabase-config.js"></script>
-  <script type="module" src="auth.js"></script>
+  <script>
+    (() => {
+      const form = document.getElementById('authForm');
+      const submit = form.querySelector('.auth-submit');
+      const password = document.getElementById('password');
+      const confirmPassword = document.getElementById('confirmPassword');
+      const confirmGroup = document.getElementById('confirmPasswordGroup');
+      const title = document.getElementById('authTitle');
+      const lead = document.querySelector('.auth-lead');
+      const tabs = [...document.querySelectorAll('.auth-tab')];
+
+      function setVisibility(input, button, visible) {
+        input.type = visible ? 'text' : 'password';
+        button.textContent = visible ? 'Hide' : 'Show';
+        button.setAttribute('aria-pressed', String(visible));
+        button.setAttribute('aria-label', visible ? 'Hide password' : 'Show password');
+      }
+
+      function setMode(mode) {
+        const signingUp = mode === 'signup';
+        form.dataset.mode = signingUp ? 'signup' : 'signin';
+
+        tabs.forEach(tab => {
+          const active = tab.dataset.mode === form.dataset.mode;
+          tab.classList.toggle('active', active);
+          tab.setAttribute('aria-selected', String(active));
+        });
+
+        submit.textContent = signingUp ? 'Create account' : 'Sign in';
+        password.autocomplete = signingUp ? 'new-password' : 'current-password';
+        confirmGroup.hidden = !signingUp;
+        confirmPassword.required = signingUp;
+
+        if (!signingUp) {
+          confirmPassword.value = '';
+          const toggle = document.querySelector('[data-password-target="confirmPassword"]');
+          if (toggle) setVisibility(confirmPassword, toggle, false);
+        }
+
+        title.textContent = signingUp ? 'Create your provider account.' : 'Welcome back.';
+        lead.textContent = signingUp
+          ? 'Create an account to build and manage your Treasure Valley provider listing.'
+          : 'Sign in to manage your directory profile, or create an account to get started.';
+
+        document.dispatchEvent(new CustomEvent('provider-auth-mode', { detail: { mode: form.dataset.mode } }));
+      }
+
+      tabs.forEach(tab => tab.addEventListener('click', () => setMode(tab.dataset.mode)));
+
+      document.querySelectorAll('[data-password-target]').forEach(button => {
+        const input = document.getElementById(button.dataset.passwordTarget);
+        if (!input) return;
+        button.addEventListener('click', () => {
+          setVisibility(input, button, input.type === 'password');
+          input.focus({ preventScroll: true });
+        });
+      });
+
+      setMode('signin');
+    })();
+  </script>
+  <script src="/supabase-config.js"></script>
+  <script type="module" src="/auth.js?v=20260922-2"></script>
 </body>
 </html>
