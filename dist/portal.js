@@ -381,7 +381,7 @@ async function saveProfile() {
   const savedMessage = status === 'published'
     ? 'Changes saved and updated on your live profile.'
     : 'Draft saved.';
-  say(savedMessage + (typeof geocodeWarning === 'string' ? geocodeWarning : ''), 'success');
+  say(savedMessage + geocodeWarning, 'success');
   return true;
 }
 async function loadProfile() {
@@ -668,6 +668,18 @@ function renderBilling(summary) {
   else if (status === 'published' && !billingStatus) badgeText = 'Beta / manual access';
   if (badge) badge.textContent = badgeText;
 
+  const checkoutButton = document.getElementById('checkoutDemo');
+  if (checkoutButton) {
+    checkoutButton.disabled = !requiresPayment;
+    checkoutButton.textContent = requiresPayment
+      ? 'Complete annual payment'
+      : status === 'submitted'
+        ? 'Payment available after approval'
+        : status === 'published'
+          ? 'Listing active'
+          : 'Payment available after approval';
+  }
+
   if (intro) {
     intro.textContent = requiresPayment
       ? 'Your profile is approved. Complete annual payment to publish it in the directory.'
@@ -748,10 +760,74 @@ document.querySelectorAll('[data-billing-mode]').forEach(button => button.addEve
     ? 'Automatic annual renewal'
     : 'One year only';
 }));
-document.getElementById('checkoutDemo')?.addEventListener('click', () => document.getElementById('checkoutDialog').showModal());
+async function startSquareCheckout() {
+  if (!billingSummary?.requires_payment) {
+    sayPanel('billingMessage', 'Payment becomes available after administrator approval.', 'error');
+    return;
+  }
+  if (!session?.access_token) {
+    location.href = 'provider-login.html';
+    return;
+  }
+
+  const button = document.getElementById('startSquareCheckout');
+  const originalText = button?.textContent || 'Continue to Square';
+  if (button) {
+    button.disabled = true;
+    button.textContent = 'Opening secure checkout…';
+  }
+  sayPanel('billingMessage', 'Creating your secure Square checkout…');
+
+  try {
+    const response = await fetch('/api/payments/checkout', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session.access_token}`
+      },
+      credentials: 'same-origin',
+      cache: 'no-store',
+      body: JSON.stringify({ billingMode })
+    });
+    const result = await response.json().catch(() => null);
+    if (!response.ok || !result?.checkoutUrl) {
+      throw new Error(result?.error || 'Unable to start secure checkout.');
+    }
+    location.assign(result.checkoutUrl);
+  } catch (error) {
+    console.error(error);
+    sayPanel('billingMessage', error?.message || 'Unable to start secure checkout.', 'error');
+    if (button) {
+      button.disabled = false;
+      button.textContent = originalText;
+    }
+  }
+}
+
+document.getElementById('checkoutDemo')?.addEventListener('click', () => {
+  if (!billingSummary?.requires_payment) return;
+  document.getElementById('checkoutDialog').showModal();
+});
+document.getElementById('startSquareCheckout')?.addEventListener('click', startSquareCheckout);
 document.getElementById('closeCheckout')?.addEventListener('click', () => document.getElementById('checkoutDialog').close());
 
 const { data: auth } = await supabase.auth.getSession();
 session = auth.session;
 if (!session) location.href = 'provider-login.html';
-else await loadProfile();
+else {
+  await loadProfile();
+  const requestedPanel = qs.get('panel');
+  if (requestedPanel && buttons.some(button => button.dataset.panel === requestedPanel)) {
+    showPanel(requestedPanel);
+  }
+  if (qs.get('checkout') === 'success') {
+    sayPanel(
+      'billingMessage',
+      billingSummary?.requires_payment
+        ? 'Square returned you to the portal. Payment confirmation is still being verified.'
+        : 'Payment confirmed. Your annual listing is active.',
+      billingSummary?.requires_payment ? '' : 'success'
+    );
+  }
+}
