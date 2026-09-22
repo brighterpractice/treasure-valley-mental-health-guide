@@ -319,3 +319,44 @@
     font-size:34px;
   }
 }
+
+
+/* Password visibility + signup confirmation */
+.auth-password-wrap{
+  position:relative;
+}
+.auth-password-wrap input{
+  padding-right:74px;
+}
+.auth-password-toggle{
+  position:absolute;
+  top:50%;
+  right:8px;
+  transform:translateY(-50%);
+  min-width:54px;
+  min-height:36px;
+  padding:0 9px;
+  border:0;
+  border-radius:9px;
+  background:#edf3ef;
+  color:#315c53;
+  cursor:pointer;
+  font-size:12px;
+  font-weight:800;
+}
+.auth-password-toggle:hover,
+.auth-password-toggle:focus-visible{
+  background:#dfeae3;
+  color:#173b3a;
+  outline:none;
+}
+.auth-password-toggle:focus-visible{
+  box-shadow:0 0 0 3px rgba(76,113,103,.14);
+}
+.auth-confirm-group{
+  display:grid;
+  gap:9px;
+}
+.auth-confirm-group[hidden]{
+  display:none!important;
+}
