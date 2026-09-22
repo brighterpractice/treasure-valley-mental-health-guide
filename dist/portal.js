@@ -777,6 +777,11 @@ async function startSquareCheckout() {
     button.textContent = 'Opening secure checkout…';
   }
   sayPanel('billingMessage', 'Creating your secure Square checkout…');
+  const dialogMessage = document.getElementById('checkoutDialogMessage');
+  if (dialogMessage) {
+    dialogMessage.textContent = 'Creating your secure Square checkout…';
+    dialogMessage.dataset.kind = '';
+  }
 
   try {
     const response = await fetch('/api/payments/checkout', {
@@ -794,10 +799,19 @@ async function startSquareCheckout() {
     if (!response.ok || !result?.checkoutUrl) {
       throw new Error(result?.error || 'Unable to start secure checkout.');
     }
+    if (dialogMessage) {
+      dialogMessage.textContent = 'Opening Square…';
+      dialogMessage.dataset.kind = 'success';
+    }
     location.assign(result.checkoutUrl);
   } catch (error) {
     console.error(error);
-    sayPanel('billingMessage', error?.message || 'Unable to start secure checkout.', 'error');
+    const message = error?.message || 'Unable to start secure checkout.';
+    sayPanel('billingMessage', message, 'error');
+    if (dialogMessage) {
+      dialogMessage.textContent = message;
+      dialogMessage.dataset.kind = 'error';
+    }
     if (button) {
       button.disabled = false;
       button.textContent = originalText;
@@ -806,7 +820,15 @@ async function startSquareCheckout() {
 }
 
 document.getElementById('checkoutDemo')?.addEventListener('click', () => {
-  if (!billingSummary?.requires_payment) return;
+  if (!billingSummary?.requires_payment) {
+    sayPanel('billingMessage', 'Payment becomes available after administrator approval.', 'error');
+    return;
+  }
+  const dialogMessage = document.getElementById('checkoutDialogMessage');
+  if (dialogMessage) {
+    dialogMessage.textContent = '';
+    dialogMessage.dataset.kind = '';
+  }
   document.getElementById('checkoutDialog').showModal();
 });
 document.getElementById('startSquareCheckout')?.addEventListener('click', startSquareCheckout);
