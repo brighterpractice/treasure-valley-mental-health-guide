@@ -7,7 +7,7 @@
   <meta name="description" content="Provider account access for the Treasure Valley Mental Health Guide.">
   <meta name="robots" content="noindex,nofollow">
   <link rel="stylesheet" href="/site.min.css">
-  <link rel="stylesheet" href="/provider-auth.css?v=20260922-2">
+  <link rel="stylesheet" href="/provider-auth.css?v=20260922-3">
 </head>
 <body class="warm-site auth-page">
   <header class="align-header">
@@ -49,9 +49,10 @@
           <div class="auth-confirm-group" id="confirmPasswordGroup" hidden>
             <label for="confirmPassword">Confirm password</label>
             <div class="auth-password-wrap">
-              <input id="confirmPassword" type="password" autocomplete="new-password" minlength="8" placeholder="Re-enter your password">
+              <input id="confirmPassword" type="password" autocomplete="new-password" minlength="8" placeholder="Re-enter your password" aria-describedby="passwordMatchStatus">
               <button class="auth-password-toggle" type="button" data-password-target="confirmPassword" aria-label="Show confirmation password" aria-pressed="false">Show</button>
             </div>
+            <p id="passwordMatchStatus" class="auth-password-status" aria-live="polite"></p>
           </div>
 
           <button class="button primary auth-submit" type="submit">Sign in</button>
@@ -100,6 +101,7 @@
       const password = document.getElementById('password');
       const confirmPassword = document.getElementById('confirmPassword');
       const confirmGroup = document.getElementById('confirmPasswordGroup');
+      const matchStatus = document.getElementById('passwordMatchStatus');
       const title = document.getElementById('authTitle');
       const lead = document.querySelector('.auth-lead');
       const tabs = [...document.querySelectorAll('.auth-tab')];
@@ -109,6 +111,37 @@
         button.textContent = visible ? 'Hide' : 'Show';
         button.setAttribute('aria-pressed', String(visible));
         button.setAttribute('aria-label', visible ? 'Hide password' : 'Show password');
+      }
+
+      function updatePasswordMatch() {
+        if (form.dataset.mode !== 'signup') {
+          matchStatus.textContent = '';
+          matchStatus.dataset.state = '';
+          confirmPassword.removeAttribute('aria-invalid');
+          submit.disabled = false;
+          return;
+        }
+
+        if (!confirmPassword.value) {
+          matchStatus.textContent = 'Re-enter your password to confirm.';
+          matchStatus.dataset.state = 'pending';
+          confirmPassword.removeAttribute('aria-invalid');
+          submit.disabled = true;
+          return;
+        }
+
+        if (password.value === confirmPassword.value && password.value.length >= 8) {
+          matchStatus.textContent = '✓ Passwords match';
+          matchStatus.dataset.state = 'match';
+          confirmPassword.setAttribute('aria-invalid', 'false');
+          submit.disabled = false;
+          return;
+        }
+
+        matchStatus.textContent = 'Passwords do not match';
+        matchStatus.dataset.state = 'mismatch';
+        confirmPassword.setAttribute('aria-invalid', 'true');
+        submit.disabled = true;
       }
 
       function setMode(mode) {
@@ -137,8 +170,12 @@
           ? 'Create an account to build and manage your Treasure Valley provider listing.'
           : 'Sign in to manage your directory profile, or create an account to get started.';
 
+        updatePasswordMatch();
         document.dispatchEvent(new CustomEvent('provider-auth-mode', { detail: { mode: form.dataset.mode } }));
       }
+
+      password.addEventListener('input', updatePasswordMatch);
+      confirmPassword.addEventListener('input', updatePasswordMatch);
 
       tabs.forEach(tab => tab.addEventListener('click', () => setMode(tab.dataset.mode)));
 
