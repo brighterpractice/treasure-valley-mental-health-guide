@@ -41,7 +41,18 @@
           <input id="email" type="email" autocomplete="email" required placeholder="you@example.com">
 
           <label for="password">Password</label>
-          <input id="password" type="password" autocomplete="current-password" minlength="8" required placeholder="At least 8 characters">
+          <div class="auth-password-wrap">
+            <input id="password" type="password" autocomplete="current-password" minlength="8" required placeholder="At least 8 characters">
+            <button class="auth-password-toggle" type="button" data-password-target="password" aria-label="Show password" aria-pressed="false">Show</button>
+          </div>
+
+          <div class="auth-confirm-group" id="confirmPasswordGroup" hidden>
+            <label for="confirmPassword">Confirm password</label>
+            <div class="auth-password-wrap">
+              <input id="confirmPassword" type="password" autocomplete="new-password" minlength="8" placeholder="Re-enter your password">
+              <button class="auth-password-toggle" type="button" data-password-target="confirmPassword" aria-label="Show confirmation password" aria-pressed="false">Show</button>
+            </div>
+          </div>
 
           <button class="button primary auth-submit" type="submit">Sign in</button>
         </form>
