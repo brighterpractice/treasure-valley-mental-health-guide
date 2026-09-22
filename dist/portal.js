@@ -7,7 +7,7 @@ const buttons = [...document.querySelectorAll('.portal-nav button')];
 const panels = [...document.querySelectorAll('.portal-panel')];
 const title = document.getElementById('panelTitle');
 const qs = new URLSearchParams(location.search);
-let currentPlan = qs.get('plan') === 'basic' ? 'basic' : 'advanced';
+let currentPlan = qs.get('plan') === 'advanced' ? 'advanced' : 'basic';
 let session;
 let profile = null;
 let publicationStatus = 'draft';
@@ -22,6 +22,83 @@ function say(text, kind = '') {
 function sayPanel(id, text, kind = '') {
   const node = document.getElementById(id);
   if (node) { node.textContent = text; node.dataset.kind = kind; }
+}
+function profileCompleteness(row) {
+  if (!row) return 0;
+  const checks = [
+    row.first_name,
+    row.last_name,
+    row.credentials,
+    row.primary_city,
+    row.short_bio,
+    row.practice_name,
+    row.availability && row.availability !== 'Not specified',
+    Array.isArray(row.specialties) && row.specialties.length,
+    Array.isArray(row.insurance) && row.insurance.length,
+    Array.isArray(row.approaches) && row.approaches.length,
+    row.website_url,
+    row.office_address
+  ];
+  return Math.round((checks.filter(Boolean).length / checks.length) * 100);
+}
+function formatOverviewDate(value) {
+  if (!value) return 'Not yet';
+  const date = new Date(value);
+  return Number.isNaN(date.getTime())
+    ? 'Not yet'
+    : date.toLocaleDateString(undefined, { month:'short', day:'numeric', year:'numeric' });
+}
+function renderOverview(row, publication = null) {
+  const percent = profileCompleteness(row);
+  const completeness = document.getElementById('profileCompleteness');
+  const bar = document.getElementById('profileCompletenessBar');
+  const note = document.getElementById('profileCompletenessNote');
+  const verified = document.getElementById('lastVerifiedMetric');
+  const verifiedNote = document.getElementById('lastVerifiedNote');
+  const availability = document.getElementById('availabilitySummary');
+  const insurance = document.getElementById('insuranceSummary');
+  const specialties = document.getElementById('specialtiesSummary');
+  const media = document.getElementById('mediaSummary');
+  const preview = document.getElementById('previewBtn');
+
+  if (completeness) completeness.textContent = `${percent}%`;
+  if (bar) bar.style.width = `${percent}%`;
+  if (note) {
+    note.textContent = !row
+      ? 'Start your profile to begin.'
+      : percent === 100
+        ? 'Your core profile information is complete.'
+        : 'Add more profile details to strengthen your listing.';
+  }
+
+  if (verified) verified.textContent = formatOverviewDate(publication?.last_verified_at);
+  if (verifiedNote) {
+    verifiedNote.textContent = publication?.last_verified_at
+      ? 'Most recent profile verification.'
+      : 'Your listing has not been verified yet.';
+  }
+
+  if (availability) availability.textContent = row?.availability || 'Not set';
+  if (insurance) {
+    const count = Array.isArray(row?.insurance) ? row.insurance.length : 0;
+    insurance.textContent = count ? `${count} selected` : 'None selected';
+  }
+  if (specialties) {
+    const count = Array.isArray(row?.specialties) ? row.specialties.length : 0;
+    specialties.textContent = count ? `${count} selected` : 'None selected';
+  }
+  if (media) media.textContent = row?.video_url ? 'Intro video added' : 'No video added';
+  if (preview) preview.disabled = !row;
+}
+function enterNewProviderOnboarding() {
+  applyPublicationStatus('draft');
+  applyPlan(currentPlan);
+  renderOverview(null, null);
+  const preview = document.getElementById('previewBtn');
+  if (preview) preview.disabled = true;
+  showPanel('profile');
+  title.textContent = 'Set up your profile';
+  say('Start with your name, credentials, primary city, and short bio. You can save a draft as you go, then submit it for review when you are ready.');
 }
 function youtubeVideoId(value) {
   const raw = String(value || '').trim();
@@ -294,10 +371,13 @@ async function saveProfile() {
   if (result.error) { say(result.error.message, 'error'); return false; }
   populateProfile(result.data);
   const publication = profile?.id
-    ? await supabase.from('provider_publication').select('status').eq('provider_id', profile.id).maybeSingle()
+    ? await supabase.from('provider_publication').select('status, plan, last_verified_at').eq('provider_id', profile.id).maybeSingle()
     : null;
   const status = publication?.data?.status || 'draft';
   applyPublicationStatus(status);
+  renderOverview(result.data, publication?.data || null);
+  const preview = document.getElementById('previewBtn');
+  if (preview) preview.disabled = false;
   const savedMessage = status === 'published'
     ? 'Changes saved and updated on your live profile.'
     : 'Draft saved.';
@@ -308,17 +388,35 @@ async function loadProfile() {
   const { data, error } = await supabase.from('provider_profiles').select('*').maybeSingle();
   if (error) { say(error.message, 'error'); return; }
   populateProfile(data);
-  if (data) {
-    const publication = await supabase.from('provider_publication').select('status, plan').eq('provider_id', data.id).maybeSingle();
-    if (publication.data) {
-      const status = publication.data.status || 'draft';
-      currentPlan = ['draft','submitted'].includes(status)
-        ? (data.requested_plan || publication.data.plan || currentPlan)
-        : (publication.data.plan || currentPlan);
-      applyPublicationStatus(status);
-    }
+
+  if (!data) {
+    enterNewProviderOnboarding();
+    await loadBilling();
+    return;
   }
+
+  let publicationData = null;
+  const publication = await supabase
+    .from('provider_publication')
+    .select('status, plan, last_verified_at')
+    .eq('provider_id', data.id)
+    .maybeSingle();
+
+  if (publication.data) {
+    publicationData = publication.data;
+    const status = publication.data.status || 'draft';
+    currentPlan = ['draft','submitted'].includes(status)
+      ? (data.requested_plan || publication.data.plan || currentPlan)
+      : (publication.data.plan || currentPlan);
+    applyPublicationStatus(status);
+  } else {
+    applyPublicationStatus('draft');
+  }
+
   applyPlan(currentPlan);
+  renderOverview(data, publicationData);
+  const preview = document.getElementById('previewBtn');
+  if (preview) preview.disabled = false;
   await loadBilling();
 }
 async function saveAdvanced(panelMessageId, successText) {
