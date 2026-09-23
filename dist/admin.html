@@ -6,7 +6,7 @@
   <meta name="robots" content="noindex,nofollow">
   <title>Admin dashboard | Treasure Valley Mental Health Guide</title>
   <link rel="stylesheet" href="/site.min.css">
-  <link rel="stylesheet" href="/admin-dashboard.css?v=20260922-1">
+  <link rel="stylesheet" href="/admin-dashboard.css?v=20260922-2">
 </head>
 <body class="admin-console" hidden>
   <div class="admin-shell">
@@ -36,6 +36,7 @@
       <section class="admin-page active" id="admin-overview" data-panel="overview">
         <div class="admin-page-heading">
           <div><div class="admin-eyebrow">Administrator</div><h1>Directory overview</h1><p>Monitor provider approvals, active listings, billing health, and items that need attention.</p></div>
+          <button class="admin-btn" id="adminRefresh" type="button">Refresh data</button>
         </div>
 
         <div class="admin-metrics">
@@ -119,6 +120,7 @@
   </div>
 
   <script src="/supabase-config.js"></script>
-  <script type="module" src="/admin.js?v=20260922-3"></script>
+  <script type="module" src="/admin.js?v=20260922-4"></script>
+  <script src="/admin-theme.js?v=20260922-1"></script>
 </body>
 </html>
