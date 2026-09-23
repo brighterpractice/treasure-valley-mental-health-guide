@@ -39,6 +39,12 @@ export async function onRequest(context) {
         '  <script src="/admin-theme.js?v=20260922-1"></script>\n</body>',
       );
     }
+    if (!html.includes('/admin-email-test.js')) {
+      html = html.replace(
+        '</body>',
+        '  <script type="module" src="/admin-email-test.js?v=20260922-1"></script>\n</body>',
+      );
+    }
   }
 
   const headers = new Headers(response.headers);
