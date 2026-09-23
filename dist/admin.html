@@ -1,18 +1,124 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
-  <title>Admin review | Treasure Valley Mental Health Guide</title>
+  <title>Admin dashboard | Treasure Valley Mental Health Guide</title>
   <link rel="stylesheet" href="/site.min.css">
+  <link rel="stylesheet" href="/admin-dashboard.css?v=20260922-1">
 </head>
-<body class="warm-site portal-page" hidden>
-  <header class="align-header"><div class="shell align-nav-shell"><a class="align-brand" href="/"><span class="align-brand-mark" aria-hidden="true">TV</span><span class="align-brand-copy"><strong>Treasure Valley</strong><small>Mental Health Guide</small></span></a><a class="gentle-link" href="/">View guide</a></div></header>
-  <main class="portal-main admin-main"><div class="portal-heading"><div><div class="eyebrow">Administrator</div><h1>Review paid provider profiles</h1><p class="portal-lead">Payment has already been verified. Review the profile before allowing it to appear in the public directory.</p></div><button id="signOut" class="button secondary" type="button">Sign out</button></div>
-    <p id="adminMessage" class="profile-message" role="status" aria-live="polite"></p>
-    <section class="admin-layout"><aside class="admin-list"><div class="admin-list-heading"><h2>Awaiting approval</h2><span id="submissionCount" class="status-pill">0</span></div><div id="submissionList" class="submission-list"><p class="muted">Loading paid profiles…</p></div></aside>
-      <section class="admin-detail"><div id="emptyReview" class="empty-review"><h2>Select a profile</h2><p>Paid provider profiles that are waiting for publication approval will appear here.</p></div><article id="reviewCard" class="review-card" hidden><div class="review-card-heading"><div><div class="eyebrow">Paid provider profile</div><h2 id="reviewName"></h2><p id="reviewPractice" class="muted"></p></div><span id="reviewStatus" class="status-pill"></span></div><div id="reviewFields" class="review-fields"></div><div class="edit-block"><span class="field-label">Paid plan</span><p id="reviewPlanText" class="muted"></p><p class="muted">The provider has already paid for this plan. Approval publishes the profile; requesting changes keeps the paid entitlement active but leaves the listing hidden.</p></div><div class="review-actions"><button id="requestChanges" class="button secondary" type="button">Request changes</button><button id="approveProfile" class="button primary" type="button">Approve &amp; publish</button></div></article></section>
-    </section>
-  </main>
-  <script src="supabase-config.js"></script><script type="module" src="admin.js?v=20260922-2"></script>
-</body></html>
+<body class="admin-console" hidden>
+  <div class="admin-shell">
+    <aside class="admin-sidebar">
+      <a class="admin-brand" href="/">
+        <span class="admin-brand-mark">TV</span>
+        <span class="admin-brand-copy"><strong>Treasure Valley</strong><small>Mental Health Guide</small></span>
+      </a>
+      <p class="admin-role">Administrator console</p>
+
+      <nav class="admin-nav" aria-label="Administrator sections">
+        <button class="active" type="button" data-admin-panel="overview">Overview</button>
+        <button type="button" data-admin-panel="review">Review Queue <span class="nav-count" id="navReviewCount">0</span></button>
+        <button type="button" data-admin-panel="providers">Providers</button>
+        <button type="button" data-admin-panel="notifications">Notifications <span class="nav-count" id="navNotificationCount">0</span></button>
+      </nav>
+
+      <div class="admin-sidebar-bottom">
+        <a href="/" target="_blank" rel="noreferrer">View public guide</a>
+        <button id="signOut" type="button">Sign out</button>
+      </div>
+    </aside>
+
+    <main class="admin-content">
+      <p id="adminMessage" class="admin-message" role="status" aria-live="polite"></p>
+
+      <section class="admin-page active" id="admin-overview" data-panel="overview">
+        <div class="admin-page-heading">
+          <div><div class="admin-eyebrow">Administrator</div><h1>Directory overview</h1><p>Monitor provider approvals, active listings, billing health, and items that need attention.</p></div>
+        </div>
+
+        <div class="admin-metrics">
+          <article class="admin-metric"><span>Awaiting review</span><strong id="metricAwaiting">0</strong><small>Paid profiles waiting for approval</small></article>
+          <article class="admin-metric"><span>Active providers</span><strong id="metricActive">0</strong><small>Currently published listings</small></article>
+          <article class="admin-metric"><span>Paid but hidden</span><strong id="metricPaidHidden">0</strong><small>Paid listings not currently public</small></article>
+          <article class="admin-metric"><span>Expiring in 30 days</span><strong id="metricExpiring">0</strong><small>Annual access nearing renewal</small></article>
+          <article class="admin-metric"><span>Past due / grace</span><strong id="metricPastDue">0</strong><small>Billing issues requiring attention</small></article>
+          <article class="admin-metric"><span>Annualized listing revenue</span><strong id="metricRevenue">$0</strong><small>Active Basic + Advanced annual plans</small></article>
+        </div>
+
+        <div class="admin-grid-two">
+          <section class="admin-card">
+            <div class="admin-card-header"><div><h2>Needs attention</h2><p>Review and billing items that should be handled first.</p></div></div>
+            <div id="attentionList" class="attention-list"><p class="empty-state">Loading…</p></div>
+          </section>
+          <section class="admin-card">
+            <div class="admin-card-header"><div><h2>Directory health</h2><p>Quick operating totals.</p></div></div>
+            <div class="attention-list">
+              <div class="attention-item"><div><strong>Total provider accounts</strong><span>Profiles created in the directory</span></div><strong id="healthTotal">0</strong></div>
+              <div class="attention-item"><div><strong>Changes requested</strong><span>Providers editing after review feedback</span></div><strong id="healthChanges">0</strong></div>
+              <div class="attention-item"><div><strong>Suspended listings</strong><span>Listings manually taken offline</span></div><strong id="healthSuspended">0</strong></div>
+              <div class="attention-item"><div><strong>Unread notifications</strong><span>Administrator inbox items</span></div><strong id="healthUnread">0</strong></div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section class="admin-page" id="admin-review" data-panel="review">
+        <div class="admin-page-heading">
+          <div><div class="admin-eyebrow">Paid profile review</div><h1>Review queue</h1><p>Payment is already verified. Approve the profile for publication or request changes while keeping the paid entitlement active.</p></div>
+        </div>
+
+        <section class="review-layout">
+          <aside class="review-list-card">
+            <div class="review-list-heading"><h2>Awaiting approval</h2><span id="submissionCount" class="admin-pill amber">0</span></div>
+            <div id="submissionList" class="submission-list"><p class="muted">Loading paid profiles…</p></div>
+          </aside>
+          <section class="review-detail-card">
+            <div id="emptyReview" class="empty-review"><div><h2>Select a profile</h2><p>Paid provider profiles waiting for publication approval will appear here.</p></div></div>
+            <article id="reviewCard" hidden>
+              <div class="review-card-heading"><div><div class="admin-eyebrow">Paid provider profile</div><h2 id="reviewName"></h2><p id="reviewPractice" class="muted"></p></div><span id="reviewStatus" class="admin-pill amber"></span></div>
+              <dl id="reviewFields" class="review-fields"></dl>
+              <div class="admin-card" style="padding:14px;margin-top:14px"><strong>Paid plan</strong><p id="reviewPlanText" class="muted"></p><p class="muted">Approval publishes the profile. Requesting changes keeps the paid year active but leaves the listing private until resubmitted.</p></div>
+              <div class="review-actions"><button id="requestChanges" class="admin-btn" type="button">Request changes</button><button id="approveProfile" class="admin-btn primary" type="button">Approve &amp; publish</button></div>
+            </article>
+          </section>
+        </section>
+      </section>
+
+      <section class="admin-page" id="admin-providers" data-panel="providers">
+        <div class="admin-page-heading">
+          <div><div class="admin-eyebrow">Provider management</div><h1>Providers</h1><p>Search every provider account and monitor publication, plan, billing, and paid-through status.</p></div>
+        </div>
+
+        <div class="admin-toolbar">
+          <input id="providerSearch" class="admin-input" type="search" placeholder="Search name, practice, email, or city…">
+          <select id="providerStatusFilter" class="admin-select"><option value="all">All statuses</option><option value="published">Published</option><option value="paid_pending_review">Awaiting review</option><option value="changes_requested">Changes requested</option><option value="suspended">Suspended</option><option value="draft">Draft</option></select>
+          <select id="providerPlanFilter" class="admin-select"><option value="all">All plans</option><option value="basic">Basic</option><option value="advanced">Advanced</option></select>
+        </div>
+
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead><tr><th>Provider</th><th>City</th><th>Plan</th><th>Listing</th><th>Billing</th><th>Paid through</th><th>Updated</th><th>Actions</th></tr></thead>
+            <tbody id="providerTableBody"><tr><td colspan="8" class="empty-state">Loading providers…</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="admin-page" id="admin-notifications" data-panel="notifications">
+        <div class="admin-page-heading">
+          <div><div class="admin-eyebrow">Administrator inbox</div><h1>Notifications</h1><p>Payment-review alerts, resubmissions, and delivery status for administrator email notifications.</p></div>
+        </div>
+
+        <div class="admin-toolbar">
+          <select id="notificationFilter" class="admin-select"><option value="unread">Unread</option><option value="all">All notifications</option></select>
+        </div>
+        <section class="admin-card"><div id="notificationList" class="notification-list"><p class="empty-state">Loading notifications…</p></div></section>
+      </section>
+    </main>
+  </div>
+
+  <script src="/supabase-config.js"></script>
+  <script type="module" src="/admin.js?v=20260922-3"></script>
+</body>
+</html>
