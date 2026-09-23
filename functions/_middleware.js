@@ -16,6 +16,12 @@ export async function onRequest(context) {
       '  <script type="module" src="/portal-workflow-v2.js?v=20260922-1"></script>\n</body>',
     );
   }
+  if (!html.includes('/provider-workflow-copy.js')) {
+    html = html.replace(
+      '</body>',
+      '  <script src="/provider-workflow-copy.js?v=20260922-1"></script>\n</body>',
+    );
+  }
 
   const headers = new Headers(response.headers);
   headers.delete('Content-Length');
