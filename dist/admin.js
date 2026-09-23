@@ -1,16 +1,19 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
 
-const supabase = createClient(
-  window.TV_GUIDE_SUPABASE.url,
-  window.TV_GUIDE_SUPABASE.publishableKey,
-);
+const cfg = window.TV_GUIDE_SUPABASE;
+if (!cfg?.url || !cfg?.publishableKey) {
+  throw new Error('Supabase configuration is missing.');
+}
 
+const supabase = createClient(cfg.url, cfg.publishableKey);
 const $ = (id) => document.getElementById(id);
+
 let summary = {};
 let submissions = [];
 let providers = [];
 let notifications = [];
 let selected = null;
+let refreshing = false;
 
 function message(text = '', kind = '') {
   const node = $('adminMessage');
@@ -59,7 +62,9 @@ function formatDateTime(value, fallback = '—') {
 }
 
 function titleCase(value) {
-  return String(value || 'unknown').replaceAll('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+  return String(value || 'unknown')
+    .replaceAll('_', ' ')
+    .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 function statusClass(value) {
@@ -70,11 +75,18 @@ function statusClass(value) {
 }
 
 function formatMoney(cents) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format((Number(cents) || 0) / 100);
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency', currency: 'USD', maximumFractionDigits: 0,
+  }).format((Number(cents) || 0) / 100);
+}
+
+function setText(id, value) {
+  const node = $(id);
+  if (node) node.textContent = value;
 }
 
 function showPanel(panel) {
-  document.querySelectorAll('[data-panel]').forEach((node) => {
+  document.querySelectorAll('.admin-page[data-panel]').forEach((node) => {
     node.classList.toggle('active', node.dataset.panel === panel);
   });
   document.querySelectorAll('[data-admin-panel]').forEach((button) => {
@@ -83,18 +95,18 @@ function showPanel(panel) {
 }
 
 function renderSummary() {
-  $('metricAwaiting').textContent = summary.awaiting_review ?? 0;
-  $('metricActive').textContent = summary.active_providers ?? 0;
-  $('metricPaidHidden').textContent = summary.paid_hidden ?? 0;
-  $('metricExpiring').textContent = summary.expiring_30_days ?? 0;
-  $('metricPastDue').textContent = summary.past_due ?? 0;
-  $('metricRevenue').textContent = formatMoney(summary.annual_revenue_cents);
-  $('healthTotal').textContent = summary.total_providers ?? 0;
-  $('healthChanges').textContent = summary.changes_requested ?? 0;
-  $('healthSuspended').textContent = summary.suspended ?? 0;
-  $('healthUnread').textContent = summary.unread_notifications ?? 0;
-  $('navReviewCount').textContent = summary.awaiting_review ?? submissions.length;
-  $('navNotificationCount').textContent = summary.unread_notifications ?? notifications.filter((n) => !n.read_at).length;
+  setText('metricAwaiting', summary.awaiting_review ?? 0);
+  setText('metricActive', summary.active_providers ?? 0);
+  setText('metricPaidHidden', summary.paid_hidden ?? 0);
+  setText('metricExpiring', summary.expiring_30_days ?? 0);
+  setText('metricPastDue', summary.past_due ?? 0);
+  setText('metricRevenue', formatMoney(summary.annual_revenue_cents));
+  setText('healthTotal', summary.total_providers ?? 0);
+  setText('healthChanges', summary.changes_requested ?? 0);
+  setText('healthSuspended', summary.suspended ?? 0);
+  setText('healthUnread', summary.unread_notifications ?? 0);
+  setText('navReviewCount', summary.awaiting_review ?? submissions.length);
+  setText('navNotificationCount', summary.unread_notifications ?? notifications.filter((n) => !n.read_at).length);
 }
 
 function renderAttention() {
@@ -107,12 +119,15 @@ function renderAttention() {
     id: provider.id,
   }));
 
-  providers.filter((p) => ['past_due', 'grace_period'].includes(p.billing_status)).slice(0, 3).forEach((provider) => items.push({
-    kind: 'provider',
-    label: `${provider.first_name || ''} ${provider.last_name || ''}`.trim() || provider.email,
-    detail: `Billing is ${titleCase(provider.billing_status)}`,
-    id: provider.id,
-  }));
+  providers
+    .filter((p) => ['past_due', 'grace_period'].includes(p.billing_status))
+    .slice(0, 3)
+    .forEach((provider) => items.push({
+      kind: 'provider',
+      label: `${provider.first_name || ''} ${provider.last_name || ''}`.trim() || provider.email,
+      detail: `Billing is ${titleCase(provider.billing_status)}`,
+      id: provider.id,
+    }));
 
   const now = Date.now();
   const thirtyDays = 30 * 24 * 60 * 60 * 1000;
@@ -126,7 +141,9 @@ function renderAttention() {
     id: provider.id,
   }));
 
-  $('attentionList').innerHTML = items.length
+  const list = $('attentionList');
+  if (!list) return;
+  list.innerHTML = items.length
     ? items.slice(0, 8).map((item) => `
       <div class="attention-item">
         <div><strong>${esc(item.label)}</strong><span>${esc(item.detail)}</span></div>
@@ -140,8 +157,9 @@ function renderAttention() {
         showPanel('review');
         selectSubmission(button.dataset.attentionId);
       } else {
+        const provider = providers.find((p) => p.id === button.dataset.attentionId);
         showPanel('providers');
-        $('providerSearch').value = providers.find((p) => p.id === button.dataset.attentionId)?.email || '';
+        if ($('providerSearch')) $('providerSearch').value = provider?.email || provider?.last_name || '';
         renderProviders();
       }
     });
@@ -149,8 +167,10 @@ function renderAttention() {
 }
 
 function renderReviewList() {
-  $('submissionCount').textContent = submissions.length;
-  $('submissionList').innerHTML = submissions.length
+  setText('submissionCount', submissions.length);
+  const list = $('submissionList');
+  if (!list) return;
+  list.innerHTML = submissions.length
     ? submissions.map((provider) => `
       <button class="submission-item ${selected?.id === provider.id ? 'active' : ''}" data-id="${provider.id}">
         <strong>${esc(provider.first_name)} ${esc(provider.last_name)}</strong>
@@ -165,18 +185,22 @@ function renderReviewList() {
 }
 
 function renderReviewDetail() {
+  const empty = $('emptyReview');
+  const card = $('reviewCard');
+  if (!empty || !card) return;
+
   if (!selected) {
-    $('emptyReview').hidden = false;
-    $('reviewCard').hidden = true;
+    empty.hidden = false;
+    card.hidden = true;
     return;
   }
 
-  $('emptyReview').hidden = true;
-  $('reviewCard').hidden = false;
-  $('reviewName').textContent = `${selected.first_name} ${selected.last_name}${selected.credentials ? `, ${selected.credentials}` : ''}`;
-  $('reviewPractice').textContent = `${selected.practice_name || 'Independent practice'} · ${selected.primary_city || 'No city listed'}`;
-  $('reviewStatus').textContent = 'Paid · awaiting review';
-  $('reviewPlanText').textContent = selected.plan === 'advanced' ? 'Advanced · $49/year' : 'Basic · $12/year';
+  empty.hidden = true;
+  card.hidden = false;
+  setText('reviewName', `${selected.first_name || ''} ${selected.last_name || ''}${selected.credentials ? `, ${selected.credentials}` : ''}`.trim());
+  setText('reviewPractice', `${selected.practice_name || 'Independent practice'} · ${selected.primary_city || 'No city listed'}`);
+  setText('reviewStatus', 'Paid · awaiting review');
+  setText('reviewPlanText', selected.plan === 'advanced' ? 'Advanced · $49/year' : 'Basic · $12/year');
 
   const qrCodes = [
     selected.show_website_qr ? 'Website' : '',
@@ -205,7 +229,8 @@ function renderReviewDetail() {
     ['Paid plan', selected.plan === 'advanced' ? 'Advanced' : 'Basic'],
   ];
 
-  $('reviewFields').innerHTML = rows
+  const fields = $('reviewFields');
+  if (fields) fields.innerHTML = rows
     .map(([label, value]) => `<div class="review-field"><dt>${esc(label)}</dt><dd>${value}</dd></div>`)
     .join('');
 }
@@ -217,27 +242,31 @@ function selectSubmission(id) {
 }
 
 function providerMatchesFilters(provider) {
-  const query = $('providerSearch').value.trim().toLowerCase();
-  const status = $('providerStatusFilter').value;
-  const plan = $('providerPlanFilter').value;
-  const haystack = [provider.first_name, provider.last_name, provider.practice_name, provider.email, provider.primary_city].join(' ').toLowerCase();
+  const query = ($('providerSearch')?.value || '').trim().toLowerCase();
+  const status = $('providerStatusFilter')?.value || 'all';
+  const plan = $('providerPlanFilter')?.value || 'all';
+  const haystack = [provider.first_name, provider.last_name, provider.practice_name, provider.email, provider.primary_city]
+    .join(' ').toLowerCase();
   return (!query || haystack.includes(query))
     && (status === 'all' || provider.publication_status === status)
     && (plan === 'all' || provider.plan === plan);
 }
 
 function renderProviders() {
+  const body = $('providerTableBody');
+  if (!body) return;
   const rows = providers.filter(providerMatchesFilters);
-  $('providerTableBody').innerHTML = rows.length ? rows.map((provider) => {
+  body.innerHTML = rows.length ? rows.map((provider) => {
     const fullName = `${provider.first_name || ''} ${provider.last_name || ''}`.trim() || 'Unnamed provider';
-    const paidThrough = formatDate(provider.current_period_end);
     const actions = [];
 
     if (provider.publication_status === 'paid_pending_review') {
       actions.push(`<button class="admin-btn" type="button" data-provider-action="review" data-id="${provider.id}">Review</button>`);
     }
     if (provider.publication_status === 'published') {
-      if (provider.public_slug) actions.push(`<a class="admin-btn" href="/providers/${encodeURIComponent(provider.public_slug)}" target="_blank" rel="noreferrer">View</a>`);
+      if (provider.public_slug) {
+        actions.push(`<a class="admin-btn" href="/providers/${encodeURIComponent(provider.public_slug)}" target="_blank" rel="noreferrer">View</a>`);
+      }
       actions.push(`<button class="admin-btn danger" type="button" data-provider-action="suspend" data-id="${provider.id}">Suspend</button>`);
     }
     if (provider.publication_status === 'suspended') {
@@ -250,7 +279,7 @@ function renderProviders() {
       <td><span class="admin-pill blue">${esc(titleCase(provider.plan))}</span></td>
       <td><span class="admin-pill ${statusClass(provider.publication_status)}">${esc(titleCase(provider.publication_status))}</span></td>
       <td><span class="admin-pill ${statusClass(provider.billing_status)}">${esc(titleCase(provider.billing_status))}</span></td>
-      <td>${paidThrough}</td>
+      <td>${formatDate(provider.current_period_end)}</td>
       <td>${formatDate(provider.profile_updated_at)}</td>
       <td><div class="table-actions">${actions.join('') || '<span class="muted">—</span>'}</div></td>
     </tr>`;
@@ -265,13 +294,16 @@ function notificationCopy(notification) {
   const name = notification.provider_name || notification.practice_name || 'Provider';
   if (notification.kind === 'provider_paid_pending_review') return `${name} paid and is waiting for profile review.`;
   if (notification.kind === 'provider_changes_resubmitted') return `${name} resubmitted requested profile changes.`;
+  if (notification.kind === 'provider_submission') return `${name} submitted a profile.`;
   return `${name}: ${titleCase(notification.kind)}`;
 }
 
 function renderNotifications() {
-  const filter = $('notificationFilter').value;
+  const list = $('notificationList');
+  if (!list) return;
+  const filter = $('notificationFilter')?.value || 'unread';
   const rows = notifications.filter((n) => filter === 'all' || !n.read_at);
-  $('notificationList').innerHTML = rows.length ? rows.map((notification) => `
+  list.innerHTML = rows.length ? rows.map((notification) => `
     <div class="notification-item ${notification.read_at ? '' : 'unread'}">
       <div class="notification-copy">
         <strong>${esc(notificationCopy(notification))}</strong>
@@ -294,21 +326,32 @@ function renderNotifications() {
     button.addEventListener('click', () => {
       const provider = providers.find((item) => item.id === button.dataset.notificationProvider);
       showPanel('providers');
-      $('providerSearch').value = provider?.email || provider?.last_name || '';
+      if ($('providerSearch')) $('providerSearch').value = provider?.email || provider?.last_name || '';
       renderProviders();
     });
   });
 }
 
+function renderLoadFailure(error) {
+  const text = error?.message || 'Unable to load administrator data.';
+  message(text, 'error');
+  if ($('attentionList')) $('attentionList').innerHTML = '<p class="empty-state">Administrator data could not be loaded. Use Refresh data to try again.</p>';
+  if ($('submissionList')) $('submissionList').innerHTML = '<p class="empty-state">Unable to load review queue.</p>';
+  if ($('providerTableBody')) $('providerTableBody').innerHTML = '<tr><td colspan="8" class="empty-state">Unable to load providers.</td></tr>';
+  if ($('notificationList')) $('notificationList').innerHTML = '<p class="empty-state">Unable to load notifications.</p>';
+}
+
 async function verifyAdminAccess() {
-  const { data: auth } = await supabase.auth.getSession();
+  const { data: auth, error: sessionError } = await supabase.auth.getSession();
+  if (sessionError) throw sessionError;
   if (!auth.session) {
     location.replace('/provider-login');
     return false;
   }
 
   const { data: isAdmin, error } = await supabase.rpc('tv_is_admin');
-  if (error || isAdmin !== true) {
+  if (error) throw error;
+  if (isAdmin !== true) {
     location.replace('/dashboard?admin=denied');
     return false;
   }
@@ -317,53 +360,68 @@ async function verifyAdminAccess() {
   return true;
 }
 
+function timeout(ms) {
+  return new Promise((_, reject) => setTimeout(() => reject(new Error('Administrator data request timed out. Please refresh and try again.')), ms));
+}
+
 async function refreshAll({ quiet = false } = {}) {
+  if (refreshing) return;
+  refreshing = true;
+  const refreshButton = $('adminRefresh');
+  if (refreshButton) refreshButton.disabled = true;
   if (!quiet) message('Refreshing administrator data…');
 
-  const [summaryResult, submissionsResult, providersResult, notificationsResult] = await Promise.all([
-    supabase.rpc('admin_dashboard_summary'),
-    supabase.rpc('admin_list_submissions'),
-    supabase.rpc('admin_list_providers'),
-    supabase.rpc('admin_list_notifications'),
-  ]);
+  try {
+    const requests = Promise.all([
+      supabase.rpc('admin_dashboard_summary'),
+      supabase.rpc('admin_list_submissions'),
+      supabase.rpc('admin_list_providers'),
+      supabase.rpc('admin_list_notifications'),
+    ]);
 
-  const firstError = [summaryResult, submissionsResult, providersResult, notificationsResult].find((result) => result.error)?.error;
-  if (firstError) {
-    console.error(firstError);
-    message(firstError.message || 'Unable to load administrator data.', 'error');
-    return;
+    const [summaryResult, submissionsResult, providersResult, notificationsResult] = await Promise.race([
+      requests,
+      timeout(15000),
+    ]);
+
+    const firstError = [summaryResult, submissionsResult, providersResult, notificationsResult]
+      .find((result) => result?.error)?.error;
+    if (firstError) throw firstError;
+
+    summary = summaryResult?.data && typeof summaryResult.data === 'object' ? summaryResult.data : {};
+    submissions = Array.isArray(submissionsResult?.data) ? submissionsResult.data : [];
+    providers = Array.isArray(providersResult?.data) ? providersResult.data : [];
+    notifications = Array.isArray(notificationsResult?.data) ? notificationsResult.data : [];
+    if (selected) selected = submissions.find((item) => item.id === selected.id) || null;
+
+    renderSummary();
+    renderAttention();
+    renderReviewList();
+    renderReviewDetail();
+    renderProviders();
+    renderNotifications();
+    if (!quiet) message('');
+  } catch (error) {
+    console.error('Admin refresh failed:', error);
+    renderLoadFailure(error);
+  } finally {
+    refreshing = false;
+    if (refreshButton) refreshButton.disabled = false;
   }
-
-  summary = summaryResult.data || {};
-  submissions = submissionsResult.data || [];
-  providers = providersResult.data || [];
-  notifications = notificationsResult.data || [];
-  if (selected) selected = submissions.find((item) => item.id === selected.id) || null;
-
-  renderSummary();
-  renderAttention();
-  renderReviewList();
-  renderReviewDetail();
-  renderProviders();
-  renderNotifications();
-  if (!quiet) message('');
 }
 
 async function approve() {
   if (!selected) return;
   const providerId = selected.id;
   message('Publishing the approved provider profile…');
-  $('approveProfile').disabled = true;
-  $('requestChanges').disabled = true;
+  if ($('approveProfile')) $('approveProfile').disabled = true;
+  if ($('requestChanges')) $('requestChanges').disabled = true;
 
   const { error } = await supabase.rpc('admin_approve_provider', { target_provider_id: providerId });
 
-  $('approveProfile').disabled = false;
-  $('requestChanges').disabled = false;
-  if (error) {
-    message(error.message, 'error');
-    return;
-  }
+  if ($('approveProfile')) $('approveProfile').disabled = false;
+  if ($('requestChanges')) $('requestChanges').disabled = false;
+  if (error) { message(error.message, 'error'); return; }
 
   selected = null;
   message('Profile approved and published.', 'success');
@@ -374,17 +432,14 @@ async function requestChanges() {
   if (!selected) return;
   const providerId = selected.id;
   message('Requesting profile changes…');
-  $('approveProfile').disabled = true;
-  $('requestChanges').disabled = true;
+  if ($('approveProfile')) $('approveProfile').disabled = true;
+  if ($('requestChanges')) $('requestChanges').disabled = true;
 
   const { error } = await supabase.rpc('admin_request_provider_changes', { target_provider_id: providerId });
 
-  $('approveProfile').disabled = false;
-  $('requestChanges').disabled = false;
-  if (error) {
-    message(error.message, 'error');
-    return;
-  }
+  if ($('approveProfile')) $('approveProfile').disabled = false;
+  if ($('requestChanges')) $('requestChanges').disabled = false;
+  if (error) { message(error.message, 'error'); return; }
 
   selected = null;
   message('Changes requested. The listing remains private while paid access stays active.', 'success');
@@ -427,21 +482,35 @@ async function markNotificationRead(id) {
   await refreshAll({ quiet: true });
 }
 
-document.querySelectorAll('[data-admin-panel]').forEach((button) => {
-  button.addEventListener('click', () => showPanel(button.dataset.adminPanel));
-});
-$('providerSearch').addEventListener('input', renderProviders);
-$('providerStatusFilter').addEventListener('change', renderProviders);
-$('providerPlanFilter').addEventListener('change', renderProviders);
-$('notificationFilter').addEventListener('change', renderNotifications);
-$('approveProfile').addEventListener('click', approve);
-$('requestChanges').addEventListener('click', requestChanges);
-$('signOut').addEventListener('click', async () => {
-  const { error } = await supabase.auth.signOut();
-  if (error) { message(error.message, 'error'); return; }
-  location.replace('/provider-login?signed_out=1');
-});
-
-if (await verifyAdminAccess()) {
-  await refreshAll();
+function bindStaticEvents() {
+  document.querySelectorAll('[data-admin-panel]').forEach((button) => {
+    button.addEventListener('click', () => showPanel(button.dataset.adminPanel));
+  });
+  $('providerSearch')?.addEventListener('input', renderProviders);
+  $('providerStatusFilter')?.addEventListener('change', renderProviders);
+  $('providerPlanFilter')?.addEventListener('change', renderProviders);
+  $('notificationFilter')?.addEventListener('change', renderNotifications);
+  $('approveProfile')?.addEventListener('click', approve);
+  $('requestChanges')?.addEventListener('click', requestChanges);
+  $('adminRefresh')?.addEventListener('click', () => refreshAll());
+  $('signOut')?.addEventListener('click', async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) { message(error.message, 'error'); return; }
+    location.replace('/provider-login?signed_out=1');
+  });
 }
+
+async function boot() {
+  bindStaticEvents();
+  try {
+    if (await verifyAdminAccess()) {
+      await refreshAll();
+    }
+  } catch (error) {
+    console.error('Admin dashboard failed to initialize:', error);
+    document.body.hidden = false;
+    renderLoadFailure(error);
+  }
+}
+
+boot();
