@@ -13,11 +13,31 @@ const confirmPassword = document.getElementById('confirmPassword');
 const qs = new URLSearchParams(location.search);
 const requestedPlan = qs.get('plan') === 'advanced' ? 'advanced' : qs.get('plan') === 'basic' ? 'basic' : '';
 const loginReturn = requestedPlan ? `${location.origin}/provider-login?plan=${requestedPlan}` : `${location.origin}/provider-login`;
-const dashboardTarget = requestedPlan ? `/dashboard?plan=${requestedPlan}` : '/dashboard';
+const providerTarget = requestedPlan ? `/dashboard?plan=${requestedPlan}` : '/dashboard';
 
 function say(text, kind = '') {
   message.textContent = text;
   message.dataset.kind = kind;
+}
+
+async function destinationForSignedInUser() {
+  const { data: isAdmin, error } = await supabase.rpc('tv_is_admin');
+  if (error) {
+    console.error('Unable to determine account role', error);
+    throw new Error('Unable to determine whether this account is an administrator. Please try again.');
+  }
+  return isAdmin === true ? '/admin' : providerTarget;
+}
+
+async function routeSignedInUser(prefix = 'Signed in.') {
+  try {
+    const destination = await destinationForSignedInUser();
+    const admin = destination === '/admin';
+    say(`${prefix} Opening your ${admin ? 'administrator dashboard' : 'provider portal'}…`, 'success');
+    location.href = destination;
+  } catch (error) {
+    say(error?.message || 'Unable to open your account.', 'error');
+  }
 }
 
 form.addEventListener('submit', async event => {
@@ -57,8 +77,7 @@ form.addEventListener('submit', async event => {
     return;
   }
 
-  say('Signed in. Opening your provider portal…', 'success');
-  location.href = dashboardTarget;
+  await routeSignedInUser('Signed in.');
 });
 
 const signedOut = qs.get('signed_out') === '1';
@@ -68,6 +87,5 @@ if (signedOut) {
   if (session) await supabase.auth.signOut();
   say('You have been signed out.', 'success');
 } else if (session) {
-  say('You are already signed in. Opening your provider portal…', 'success');
-  setTimeout(() => location.href = dashboardTarget, 500);
+  await routeSignedInUser('You are already signed in.');
 }
