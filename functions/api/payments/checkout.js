@@ -4,6 +4,12 @@ const ALLOWED_ORIGINS = new Set([
 ]);
 
 const SQUARE_API_VERSION = '2026-08-19';
+const PREPAYMENT_STATUSES = new Set([
+  'draft',
+  'submitted',
+  'approved_pending_payment',
+  'payment_pending',
+]);
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -97,6 +103,16 @@ function planVariationId(env, plan) {
   );
 }
 
+function profileReadyForPayment(provider) {
+  return Boolean(
+    String(provider?.first_name || '').trim() &&
+    String(provider?.last_name || '').trim() &&
+    String(provider?.credentials || '').trim() &&
+    String(provider?.primary_city || '').trim() &&
+    String(provider?.short_bio || '').trim()
+  );
+}
+
 async function createSquarePaymentLink(env, { providerId, plan, billingMode, redirectUrl }) {
   const accessToken = getRequiredEnv(env, 'SQUARE_ACCESS_TOKEN');
   const locationId = getRequiredEnv(env, 'SQUARE_LOCATION_ID');
@@ -184,24 +200,48 @@ export async function onRequestPost(context) {
 
     const provider = await readSingle(
       env,
-      `/rest/v1/provider_profiles?owner_user_id=eq.${encodeURIComponent(user.id)}&select=id,requested_plan&limit=1`,
+      `/rest/v1/provider_profiles?owner_user_id=eq.${encodeURIComponent(user.id)}&select=id,requested_plan,first_name,last_name,credentials,primary_city,short_bio&limit=1`,
     );
     if (!provider?.id) return json({ error: 'Provider profile not found.' }, 404);
+
+    if (!profileReadyForPayment(provider)) {
+      return json({
+        error: 'Complete and save your first name, last name, credentials, primary city, and short bio before payment.',
+      }, 409);
+    }
 
     const publication = await readSingle(
       env,
       `/rest/v1/provider_publication?provider_id=eq.${encodeURIComponent(provider.id)}&select=plan,status&limit=1`,
     );
     if (!publication) return json({ error: 'Publication record not found.' }, 409);
-    if (publication.status !== 'approved_pending_payment') {
-      return json({
-        error: publication.status === 'published'
-          ? 'This listing is already active.'
-          : 'Payment is available after administrator approval.',
-      }, 409);
+
+    if (!PREPAYMENT_STATUSES.has(publication.status)) {
+      const error = publication.status === 'published'
+        ? 'This listing is already active.'
+        : publication.status === 'paid_pending_review'
+          ? 'Payment has already been received. Your profile is awaiting administrator review.'
+          : publication.status === 'changes_requested'
+            ? 'Payment is already active. Save the requested changes and resubmit your profile for review.'
+            : publication.status === 'suspended'
+              ? 'This listing is suspended. Contact the directory administrator.'
+              : 'This profile is not eligible for a new checkout.';
+      return json({ error }, 409);
     }
 
-    const plan = publication.plan === 'advanced' ? 'advanced' : 'basic';
+    const existingSubscription = await readSingle(
+      env,
+      `/rest/v1/provider_subscriptions?provider_id=eq.${encodeURIComponent(provider.id)}&select=status,current_period_end&limit=1`,
+    );
+    if (existingSubscription && ['active', 'grace_period'].includes(existingSubscription.status)) {
+      return json({ error: 'Your annual payment is already active.' }, 409);
+    }
+
+    const requestedPlan = provider.requested_plan === 'advanced' ? 'advanced' : 'basic';
+    const plan = publication.status === 'approved_pending_payment'
+      ? (publication.plan === 'advanced' ? 'advanced' : 'basic')
+      : requestedPlan;
+
     const origin = new URL(request.url).origin;
     const redirectUrl = `${origin}/dashboard?panel=billing&checkout=success`;
     const paymentLink = await createSquarePaymentLink(env, {
@@ -236,6 +276,20 @@ export async function onRequestPost(context) {
     if (!subscriptionResponse.ok) {
       console.error('Unable to save provider Square checkout', await subscriptionResponse.text());
       return json({ error: 'Checkout was created, but billing state could not be saved.' }, 500);
+    }
+
+    const publicationResponse = await supabaseRequest(
+      env,
+      `/rest/v1/provider_publication?provider_id=eq.${encodeURIComponent(provider.id)}`,
+      {
+        method: 'PATCH',
+        headers: { Prefer: 'return=minimal' },
+        body: JSON.stringify({ plan, status: 'payment_pending' }),
+      },
+    );
+    if (!publicationResponse.ok) {
+      console.error('Unable to mark provider payment pending', await publicationResponse.text());
+      return json({ error: 'Checkout was created, but the provider workflow could not be updated.' }, 500);
     }
 
     const eventResponse = await supabaseRequest(env, '/rest/v1/provider_billing_events', {
