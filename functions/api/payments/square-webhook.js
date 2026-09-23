@@ -1,3 +1,5 @@
+import { sendPendingProviderReviewEmail } from '../../_lib/review-email.js';
+
 const SQUARE_API_VERSION = '2026-08-19';
 
 function json(data, status = 200) {
@@ -221,10 +223,21 @@ export async function onRequestPost(context) {
       return json({ error: 'Unable to reconcile Square webhook.' }, 500);
     }
 
+    let emailAlert = { sent: false, skipped: 'not_attempted' };
+    try {
+      emailAlert = await sendPendingProviderReviewEmail(env, subscription.provider_id);
+    } catch (emailError) {
+      // Payment reconciliation must never fail because an alert email provider is down.
+      console.error('Provider payment activated but review email could not be sent', emailError);
+      emailAlert = { sent: false, skipped: 'send_failed' };
+    }
+
     return json({
       received: true,
       activated: true,
       providerId: subscription.provider_id,
+      reviewQueued: true,
+      emailAlert,
     });
   } catch (error) {
     console.error('Unable to reconcile provider Square webhook', error);
