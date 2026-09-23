@@ -4,23 +4,41 @@ export async function onRequest(context) {
   if (request.method !== 'GET') return response;
 
   const url = new URL(request.url);
-  if (!['/dashboard', '/dashboard.html'].includes(url.pathname)) return response;
+  const isDashboard = ['/dashboard', '/dashboard.html'].includes(url.pathname);
+  const isAdmin = ['/admin', '/admin.html'].includes(url.pathname);
+  if (!isDashboard && !isAdmin) return response;
 
   const contentType = response.headers.get('Content-Type') || '';
   if (!contentType.toLowerCase().includes('text/html')) return response;
 
   let html = await response.text();
-  if (!html.includes('/portal-workflow-v2.js')) {
-    html = html.replace(
-      '</body>',
-      '  <script type="module" src="/portal-workflow-v2.js?v=20260922-1"></script>\n</body>',
-    );
+
+  if (isDashboard) {
+    if (!html.includes('/portal-workflow-v2.js')) {
+      html = html.replace(
+        '</body>',
+        '  <script type="module" src="/portal-workflow-v2.js?v=20260922-1"></script>\n</body>',
+      );
+    }
+    if (!html.includes('/provider-workflow-copy.js')) {
+      html = html.replace(
+        '</body>',
+        '  <script src="/provider-workflow-copy.js?v=20260922-1"></script>\n</body>',
+      );
+    }
   }
-  if (!html.includes('/provider-workflow-copy.js')) {
+
+  if (isAdmin) {
     html = html.replace(
-      '</body>',
-      '  <script src="/provider-workflow-copy.js?v=20260922-1"></script>\n</body>',
+      '/admin-dashboard.css?v=20260922-1',
+      '/admin-dashboard.css?v=20260922-2',
     );
+    if (!html.includes('/admin-theme.js')) {
+      html = html.replace(
+        '</body>',
+        '  <script src="/admin-theme.js?v=20260922-1"></script>\n</body>',
+      );
+    }
   }
 
   const headers = new Headers(response.headers);
