@@ -6,7 +6,8 @@ export async function onRequest(context) {
   const url = new URL(request.url);
   const isDashboard = ['/dashboard', '/dashboard.html'].includes(url.pathname);
   const isAdmin = ['/admin', '/admin.html'].includes(url.pathname);
-  if (!isDashboard && !isAdmin) return response;
+  const isForProviders = ['/for-providers', '/for-providers.html'].includes(url.pathname);
+  if (!isDashboard && !isAdmin && !isForProviders) return response;
 
   const contentType = response.headers.get('Content-Type') || '';
   if (!contentType.toLowerCase().includes('text/html')) return response;
@@ -45,6 +46,13 @@ export async function onRequest(context) {
         '  <script type="module" src="/admin-email-test.js?v=20260922-1"></script>\n</body>',
       );
     }
+  }
+
+  if (isForProviders && !html.includes('/provider-demo-fictional.js')) {
+    html = html.replace(
+      '</body>',
+      '  <script src="/provider-demo-fictional.js?v=20260923-1"></script>\n</body>',
+    );
   }
 
   const headers = new Headers(response.headers);
