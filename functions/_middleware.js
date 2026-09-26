@@ -78,7 +78,7 @@ export async function onRequest(context) {
     if (!html.includes('/public-filter-flex-fields.js')) {
       html = html.replace(
         '</body>',
-        '  <script src="/public-filter-flex-fields.js?v=20260925-1"></script>\n</body>',
+        '  <script src="/public-filter-flex-fields.js?v=20260925-2"></script>\n</body>',
       );
     }
   }
