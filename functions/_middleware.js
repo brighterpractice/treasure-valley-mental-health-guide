@@ -68,11 +68,19 @@ export async function onRequest(context) {
     );
   }
 
-  if (isDirectory && !html.includes('/insurance-plan-search.js')) {
-    html = html.replace(
-      '</body>',
-      '  <script type="module" src="/insurance-plan-search.js?v=20260925-1"></script>\n</body>',
-    );
+  if (isDirectory) {
+    if (!html.includes('/insurance-plan-search.js')) {
+      html = html.replace(
+        '</body>',
+        '  <script type="module" src="/insurance-plan-search.js?v=20260925-1"></script>\n</body>',
+      );
+    }
+    if (!html.includes('/public-filter-flex-fields.js')) {
+      html = html.replace(
+        '</body>',
+        '  <script src="/public-filter-flex-fields.js?v=20260925-1"></script>\n</body>',
+      );
+    }
   }
 
   const headers = new Headers(response.headers);
