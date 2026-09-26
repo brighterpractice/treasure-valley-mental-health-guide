@@ -69,6 +69,10 @@ export async function onRequest(context) {
   }
 
   if (isDirectory) {
+    html = html
+      .replace('type="module" src="app.js"', 'type="module" src="/app-match-v2.js?v=20260925-1"')
+      .replace('type="module" src="/app.js"', 'type="module" src="/app-match-v2.js?v=20260925-1"');
+
     if (!html.includes('/insurance-plan-search.js')) {
       html = html.replace(
         '</body>',
