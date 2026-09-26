@@ -130,20 +130,17 @@ async function loadProviderReportedValues(insuranceControl, approachControl) {
   if (!cfg?.url || !cfg?.publishableKey) return;
 
   try {
-    const response = await fetch(`${cfg.url}/rest/v1/rpc/list_directory_profiles_v2`, {
-      method: 'POST',
-      headers: {
-        apikey: cfg.publishableKey,
-        Authorization: `Bearer ${cfg.publishableKey}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ page_size: 200, page_offset: 0 })
+    const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2.57.4');
+    const client = createClient(cfg.url, cfg.publishableKey);
+    const { data, error } = await client.rpc('list_directory_profiles_v2', {
+      page_size: 200,
+      page_offset: 0
     });
-    if (!response.ok) return;
-    const rows = await response.json();
+    if (error) throw error;
+
     const insurance = [];
     const approaches = [];
-    for (const row of rows || []) {
+    for (const row of data || []) {
       if (Array.isArray(row.insurance)) insurance.push(...row.insurance);
       if (Array.isArray(row.approaches)) approaches.push(...row.approaches);
     }
