@@ -7,7 +7,8 @@ export async function onRequest(context) {
   const isDashboard = ['/dashboard', '/dashboard.html'].includes(url.pathname);
   const isAdmin = ['/admin', '/admin.html'].includes(url.pathname);
   const isForProviders = ['/for-providers', '/for-providers.html'].includes(url.pathname);
-  if (!isDashboard && !isAdmin && !isForProviders) return response;
+  const isDirectory = ['/find-counselor', '/find-counselor.html'].includes(url.pathname);
+  if (!isDashboard && !isAdmin && !isForProviders && !isDirectory) return response;
 
   const contentType = response.headers.get('Content-Type') || '';
   if (!contentType.toLowerCase().includes('text/html')) return response;
@@ -25,6 +26,12 @@ export async function onRequest(context) {
       html = html.replace(
         '</body>',
         '  <script src="/provider-workflow-copy.js?v=20260922-1"></script>\n</body>',
+      );
+    }
+    if (!html.includes('/insurance-plan-entry.js')) {
+      html = html.replace(
+        '</body>',
+        '  <script src="/insurance-plan-entry.js?v=20260925-1"></script>\n</body>',
       );
     }
   }
@@ -52,6 +59,13 @@ export async function onRequest(context) {
     html = html.replace(
       '</body>',
       '  <script src="/provider-demo-fictional.js?v=20260923-1"></script>\n</body>',
+    );
+  }
+
+  if (isDirectory && !html.includes('/insurance-plan-search.js')) {
+    html = html.replace(
+      '</body>',
+      '  <script type="module" src="/insurance-plan-search.js?v=20260925-1"></script>\n</body>',
     );
   }
 
