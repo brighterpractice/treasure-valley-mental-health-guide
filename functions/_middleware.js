@@ -34,6 +34,12 @@ export async function onRequest(context) {
         '  <script src="/insurance-plan-entry.js?v=20260925-1"></script>\n</body>',
       );
     }
+    if (!html.includes('/provider-profile-flex-fields.js')) {
+      html = html.replace(
+        '</body>',
+        '  <script src="/provider-profile-flex-fields.js?v=20260925-1"></script>\n</body>',
+      );
+    }
   }
 
   if (isAdmin) {
